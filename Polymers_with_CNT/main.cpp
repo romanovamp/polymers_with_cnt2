@@ -219,42 +219,6 @@ bool all_test(double x, double y, double k, int a, vector<CNT>loc) //true - удач
 		if (belong(coord_x(x2_l, loc[i].k, loc[i].a), coord_y(y2_l, loc[i].k, loc[i].a), x, y, k, a)) return false;
 		if (belong(coord_x(x2_r, loc[i].k, loc[i].a), coord_y(y2_r, loc[i].k, loc[i].a), x, y, k, a)) return false;
 
-		
-
-
-		//if (!check(x2_l, y2_l, x1_l, y1_l, radius * 2, loc[i].a - 90, k, a)) return false; /*left-bottom*/
-		//
-		//if (!check(coord_x(x2_l, loc[i].k, loc[i].a), coord_y(y2_l, loc[i].k, loc[i].a), 
-		//				x1_l, y1_l, radius * 2, loc[i].a - 90, k, a)) return false; /*left - top*/
-
-
-		///*bottom -> left, bottom, right, top*/
-		//if (!check(x1_l, y1_l, x2_l, y2_l, radius * 2, a - 90, loc[i].k, loc[i].a)) return false; /*bottom-left*/
-		//if (!check(x1_l, y1_l, x2_l, y2_l, radius * 2, a - 90, radius * 2, loc[i].a - 90)) return false; /*bottom-bottom*/
-		//if (!check(x1_l, y1_l, x2_r, y2_r, radius * 2, a - 90, loc[i].k, loc[i].a)) return false; /*bottom-right*/
-		//if (!check(x1_l, y1_l, coord_x(x2_l, loc[i].k, loc[i].a), coord_y(y2_l, loc[i].k, loc[i].a),
-		//	radius * 2, a - 90, radius * 2, loc[i].a - 90)) return false; /*bottom-top*/
-
-
-
-		///*right -> left, bottom, right, top*/
-		//
-		//if (!check(x2_l, y2_l, x1_r, y1_r, radius * 2, loc[i].a - 90, k, a)) return false; /*right - bottom*/
-		//
-		//if (!check(coord_x(x2_l, loc[i].k, loc[i].a), coord_y(y2_l, loc[i].k, loc[i].a), x1_r, y1_r, radius * 2, loc[i].a - 90, k, a)) return false; /*right - top*/
-
-
-		///*top -> left, bottom, right, top*/
-		//if (!check(coord_x(x1_l, k, a), coord_y(y1_l, k, a), x2_l, y2_l,
-		//	radius * 2, a - 90, loc[i].k, loc[i].a)) return false; /*top-left*/
-		//if (!check(coord_x(x1_l, k, a), coord_y(y1_l, k, a), x2_l, y2_l,
-		//	radius * 2, a - 90, radius * 2, loc[i].a - 90)) return false; /*top-bottom*/
-		//if (!check(coord_x(x1_l, k, a), coord_y(y1_l, k, a), x2_r, y2_r,
-		//	radius * 2, a - 90, loc[i].k, loc[i].a)) return false; /*top-right*/
-		//if (!check(coord_x(x1_l, k, a), coord_y(y1_l, k, a), coord_x(x2_l, loc[i].k, loc[i].a), coord_y(y2_l, loc[i].k, loc[i].a),
-		//	radius * 2, a - 90, radius * 2, loc[i].a - 90)) return false; /*top-top*/
-
-
 	}
 	return true;
 }

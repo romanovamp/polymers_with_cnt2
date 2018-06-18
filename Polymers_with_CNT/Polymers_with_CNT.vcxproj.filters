@@ -36,8 +36,4 @@
       <Filter>Заголовочные файлы</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\..\..\Downloads\msvcp140.dll" />
-    <None Include="..\..\..\..\..\Downloads\msvcp140d.dll" />
-  </ItemGroup>
 </Project>
