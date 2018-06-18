@@ -1,0 +1,19 @@
+﻿  main.cpp
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(91): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(92): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(94): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(95): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(98): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(99): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(101): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(102): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(133): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(134): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(136): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(137): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(139): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(140): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(142): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(143): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt_2\polymers_with_cnt\main.cpp(187): warning C4018: <: несоответствие типов со знаком и без знака
+  Polymers_with_CNT.vcxproj -> C:\Users\Марина\Desktop\Polymers_with_CNT_2\Debug\Polymers_with_CNT.exe
