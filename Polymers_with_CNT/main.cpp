@@ -160,23 +160,17 @@ bool check(double x1, double y1, double x2, double y2, double k1, int al1, doubl
 	double a1, a2, b1, b2, c1, c2;
 	double x, y; //(x,y) - точка пересечения прямых
 
-	double x3 = coord_x(x1, k1, al1);
-	double y3 = coord_y(y1, k1, al1);
-
-	double x4 = coord_x(x2, k2, al2);
-	double y4 = coord_y(y2, k2, al2);
-
-	equation(x1, y1, x3, y3, a1, b1, c1);
-	equation(x2, y2, x4, y4, a2, b2, c2);
+	equation(x1, y1, coord_x(x1, k1, al1), coord_y(y1, k1, al1), a1, b1, c1);
+	equation(x2, y2, coord_x(x2, k2, al2), coord_y(y2, k2, al2), a2, b2, c2);
 
 	if (!parall(a1, a2, b1, b2))
 	{
 		intersect(a1, a2, b1, b2, c1, c2, x, y); //(x,y) - точка пересечения прямых
 
 		double k1 = (y2 - y1) / (x2 - x1);
-		double k2 = (y4 - y1) / (x4 - x1);
+		double k2 = (coord_y(y2, k2, al2) - y1) / (coord_x(x2, k2, al2) - x1);
 
-		if ((k1*(x - x1) - (y - y1))*(k1*(x - x3) - (y - y3)) < 0 && (k2*(x - x1) - (y - y1))*(k2*(x - x2) - (y - y2)) < 0)
+		if ((k1*(x - x1) - (y - y1))*(k1*(x - coord_x(x1, k1, al1)) - (y - coord_y(y1, k1, al1))) < 0 && (k2*(x - x1) - (y - y1))*(k2*(x - x2) - (y - y2)) < 0)
 			return true;
 	}
 	return false;
@@ -186,38 +180,43 @@ bool all_test(double x, double y, double k, int a, vector<CNT>loc) //true - удач
 {
 	for (int i = 0; i < loc.size(); i++)
 	{
-		if ((sqrt(pow(k, 2) + pow(radius, 2)) + sqrt(pow(loc[i].k, 2) + pow(radius, 2))) < d(x, y, loc[i].x, loc[i].y)) continue;
-
+		if ((sqrt(pow(k, 2) + pow(radius, 2)) + sqrt(pow(loc[i].k, 2) + pow(radius, 2))) < d(x, y, loc[i].x, loc[i].y)) continue; 
 
 		/*left -> left, bottom, right, top*/
+		/*
+		//******текущая******
 		double x1_l = coord_x(x, radius, a + 90);
-		double y1_l = coord_y(y, radius, a + 90);
-
-		double x2_l = coord_x(loc[i].x, radius, loc[i].a + 90);
-		double y2_l = coord_y(loc[i].y, radius, loc[i].a + 90);
+		double y1_l = coord_y(y, radius, a + 90); //левые нижние координаты
 
 		double x1_r = coord_x(x, radius, a - 90);
-		double y1_r = coord_y(y, radius, a - 90);
+		double y1_r = coord_y(y, radius, a - 90); //правые нижние координаты
+		//*******************
+
+		 //******проверяемая****** 
+
+		double x2_l = coord_x(loc[i].x, radius, loc[i].a + 90);
+		double y2_l = coord_y(loc[i].y, radius, loc[i].a + 90); //левые нижние координаты
 
 		double x2_r = coord_x(loc[i].x, radius, loc[i].a - 90);
-		double y2_r = coord_y(loc[i].y, radius, loc[i].a - 90);
+		double y2_r = coord_y(loc[i].y, radius, loc[i].a - 90); //правые нижние координаты
+		//***********************
+		*/
+		if (check(coord_x(x, radius, a + 90), coord_y(y, radius, a + 90), coord_x(loc[i].x, radius, loc[i].a + 90), coord_y(loc[i].y, radius, loc[i].a + 90), k, a, loc[i].k, loc[i].a)) return false;/*left-left*/
+		if (check(coord_x(x, radius, a + 90), coord_y(y, radius, a + 90), coord_x(loc[i].x, radius, loc[i].a - 90), coord_y(loc[i].y, radius, loc[i].a - 90), k, a, loc[i].k, loc[i].a)) return false; /*left-right*/
+		if (check(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), coord_x(loc[i].x, radius, loc[i].a + 90), coord_y(loc[i].y, radius, loc[i].a + 90), k, a, loc[i].k, loc[i].a)) return false; /*right-left*/
+		if (check(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), coord_x(loc[i].x, radius, loc[i].a - 90), coord_y(loc[i].y, radius, loc[i].a - 90), k, a, loc[i].k, loc[i].a)) return false; /*right-right*/
 		
-		if (check(x1_l, y1_l, x2_l, y2_l, k, a, loc[i].k, loc[i].a)) return false;/*left-left*/
-		if (check(x1_l, y1_l, x2_r, y2_r, k, a, loc[i].k, loc[i].a)) return false; /*left-right*/
-		if (check(x1_r, y1_r, x2_l, y2_l, k, a, loc[i].k, loc[i].a)) return false; /*right-left*/
-		if (check(x1_r, y1_r, x2_r, y2_r, k, a, loc[i].k, loc[i].a)) return false; /*right-right*/
 		
-		
-		if (belong(x1_l, y1_l, loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
-		if (belong(x1_r, y1_r, loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
-		if (belong(coord_x(x1_l, k, a), coord_y(y1_l, k, a), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
-		if (belong(coord_x(x1_r, k, a), coord_y(y1_r, k, a), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
+		if (belong(coord_x(x, radius, a + 90), coord_y(y, radius, a + 90), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
+		if (belong(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
+		if (belong(coord_x(coord_x(x, radius, a + 90), k, a), coord_y(coord_y(y, radius, a + 90), k, a), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
+		if (belong(coord_x(coord_x(x, radius, a - 90), k, a), coord_y(coord_y(y, radius, a - 90), k, a), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
 
 
-		if (belong(x2_l, y2_l, x, y, k, a)) return false;
-		if (belong(x2_r, y2_r, x, y, k, a)) return false;
-		if (belong(coord_x(x2_l, loc[i].k, loc[i].a), coord_y(y2_l, loc[i].k, loc[i].a), x, y, k, a)) return false;
-		if (belong(coord_x(x2_r, loc[i].k, loc[i].a), coord_y(y2_r, loc[i].k, loc[i].a), x, y, k, a)) return false;
+		if (belong(coord_x(loc[i].x, radius, loc[i].a + 90), coord_y(loc[i].y, radius, loc[i].a + 90), x, y, k, a)) return false;
+		if (belong(coord_x(loc[i].x, radius, loc[i].a - 90), coord_y(loc[i].y, radius, loc[i].a - 90), x, y, k, a)) return false;
+		if (belong(coord_x(coord_x(loc[i].x, radius, loc[i].a + 90), loc[i].k, loc[i].a), coord_y(coord_y(loc[i].y, radius, loc[i].a + 90), loc[i].k, loc[i].a), x, y, k, a)) return false;
+		if (belong(coord_x(coord_x(loc[i].x, radius, loc[i].a - 90), loc[i].k, loc[i].a), coord_y(coord_y(loc[i].y, radius, loc[i].a - 90), loc[i].k, loc[i].a), x, y, k, a)) return false;
 
 	}
 	return true;
@@ -264,8 +263,6 @@ string toStr(int number)
 	ss << number;
 	return ss.str();
 }
-
-
 
 void t(double x, double y, double k, int a)
 {
@@ -351,7 +348,7 @@ void packaging()
 
 			for (int i = 0; i < 4; i++)
 				if(!f[i]) trans(x, y, k, a);
-
+/*
 			double x1 = coord_x(x, radius, a + 90);
 			double y1 = coord_y(y, radius, a + 90);
 
@@ -363,9 +360,9 @@ void packaging()
 
 			double x4 = coord_x(x1, k, a);
 			double y4 = coord_y(y1, k, a);
-
+*/
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
-			//file << x1 << "|" << y1 << "|" << x2 << "|" << y2 << "|" << x3 << "|" << y3 << "|" << x4 << "|" << y4 << "|" << endl;
+			
 		}
 	}
 }
