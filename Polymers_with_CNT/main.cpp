@@ -11,7 +11,7 @@
 #include "CNT.h"
 #include <ctime>
 
-using namespace std;
+using namespace std;  
 
 //************************************************************************
 int L;
