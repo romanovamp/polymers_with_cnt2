@@ -28,6 +28,8 @@ bool *f = new bool[4];
 MtRng64 mt;
 bool ready = false;
 double second = 0.0;
+#define M_PI 3.14159265358979323846
+
 //************************************************************************
 int GraphInConsole()
 {
@@ -109,10 +111,20 @@ double d(double x1, double y1, double x2, double y2)
 }
 bool min_distance(double x1, double y1, double x2, double y2, double x, double y) //true - допустимое расстояние
 {
+	double a = d(x2, y2, x, y);
+	if (a <= radius * 0.154) return false;
+	double b = d(x1, y1, x2, y2);
+	double c = d(x1, y1, x, y);
+	if (c <= radius * 0.154) return false;
+	double A = (180.0 / M_PI) * acos((b*b+c*c-a*a) / (2.0*b*c));
+	if (A == 0) return false;
+	double C = (180.0 / M_PI) * acos((b*b+a*a-c*c) / (2.0*b*a));
+	if (C == 0) return false;
+	if (A > 90 || C > 90) return true; // можно не проверять
 	double p = (d(x1, y1, x2, y2) + d(x1, y1, x, y) + d(x2, y2, x, y)) / 2.0;
-	if ((2.0 / d(x1, y1, x2, y2))*sqrt(p*(p - d(x1, y1, x2, y2))*(p - d(x1, y1, x, y))*(p - d(x2, y2, x, y))) < 0.5) return false;
+	if ((2.0 / d(x1, y1, x2, y2))*sqrt(p*(p - d(x1, y1, x2, y2))*(p - d(x1, y1, x, y))*(p - d(x2, y2, x, y))) <= radius * 0.154) return false;
 	return true;
-}	
+}
 
 
 void equation(double x1, double y1, double x2, double y2, double &a, double &b, double &c) // уравнение прямой 
@@ -241,7 +253,6 @@ double bm()
 	if (ready)
 	{
 		ready = false;
-		dd << (second * devi + mean) << endl;
 		return (second * devi + mean);
 	}
 	double s = 0, u = 0, v = 0;
@@ -255,7 +266,6 @@ double bm()
 	double r = sqrt(-2.0 * log(s) / s);
 	second = r * u;
 	ready = true;
-	dd << (r * v * devi + mean) << endl;
 	return (r * v * devi + mean);
 }
 string toStr(int number)
@@ -351,7 +361,7 @@ void packaging()
 
 			for (int i = 0; i < 4; i++)
 				if(!f[i]) trans(x, y, k, a);
-
+			/*
 			double x1 = coord_x(x, radius, a + 90);
 			double y1 = coord_y(y, radius, a + 90);
 
@@ -363,9 +373,8 @@ void packaging()
 
 			double x4 = coord_x(x1, k, a);
 			double y4 = coord_y(y1, k, a);
-
+			*/
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
-			//file << x1 << "|" << y1 << "|" << x2 << "|" << y2 << "|" << x3 << "|" << y3 << "|" << x4 << "|" << y4 << "|" << endl;
 		}
 	}
 }
