@@ -134,7 +134,7 @@ void equation(double x1, double y1, double x2, double y2, double &a, double &b, 
 	c = x1 * y2 - x2 * y1;
 }
 
-bool belong(double x, double y)
+bool belong(double x, double y) //true - ÚÓ˜Í‡ ÎÂÊËÚ ‚ÌÛÚË ÓÒÌÓ‚ÌÓ„Ó Í‚‡‰‡Ú‡
 {
 	if (x >= 0 && x <= L && y >= 0 && y <= L) return true;
 	else return false;
@@ -171,24 +171,24 @@ bool check(double x1, double y1, double x2, double y2, double k1, int al1, doubl
 {
 	double a1, a2, b1, b2, c1, c2;
 	double x, y; //(x,y) - ÚÓ˜Í‡ ÔÂÂÒÂ˜ÂÌËˇ ÔˇÏ˚ı
-
+	/*
 	double x3 = coord_x(x1, k1, al1);
 	double y3 = coord_y(y1, k1, al1);
 
 	double x4 = coord_x(x2, k2, al2);
 	double y4 = coord_y(y2, k2, al2);
-
-	equation(x1, y1, x3, y3, a1, b1, c1);
-	equation(x2, y2, x4, y4, a2, b2, c2);
+	*/
+	equation(x1, y1, coord_x(x1, k1, al1), coord_y(y1, k1, al1), a1, b1, c1);
+	equation(x2, y2, coord_x(x2, k2, al2), coord_y(y2, k2, al2), a2, b2, c2);
 
 	if (!parall(a1, a2, b1, b2))
 	{
 		intersect(a1, a2, b1, b2, c1, c2, x, y); //(x,y) - ÚÓ˜Í‡ ÔÂÂÒÂ˜ÂÌËˇ ÔˇÏ˚ı
 
 		double k1 = (y2 - y1) / (x2 - x1);
-		double k2 = (y4 - y1) / (x4 - x1);
+		double k2 = (coord_y(y2, k2, al2) - y1) / (coord_x(x2, k2, al2) - x1);
 
-		if ((k1*(x - x1) - (y - y1))*(k1*(x - x3) - (y - y3)) < 0 && (k2*(x - x1) - (y - y1))*(k2*(x - x2) - (y - y2)) < 0)
+		if ((k1*(x - x1) - (y - y1))*(k1*(x - coord_x(x1, k1, al1)) - (y - coord_y(y1, k1, al1))) < 0 && (k2*(x - x1) - (y - y1))*(k2*(x - x2) - (y - y2)) < 0)
 			return true;
 	}
 	return false;
@@ -202,6 +202,7 @@ bool all_test(double x, double y, double k, int a, vector<CNT>loc) //true - Û‰‡˜
 
 
 		/*left -> left, bottom, right, top*/
+		/*
 		double x1_l = coord_x(x, radius, a + 90);
 		double y1_l = coord_y(y, radius, a + 90);
 
@@ -213,28 +214,27 @@ bool all_test(double x, double y, double k, int a, vector<CNT>loc) //true - Û‰‡˜
 
 		double x2_r = coord_x(loc[i].x, radius, loc[i].a - 90);
 		double y2_r = coord_y(loc[i].y, radius, loc[i].a - 90);
+		*/
+		if (check(coord_x(x, radius, a + 90), coord_y(y, radius, a + 90), coord_x(loc[i].x, radius, loc[i].a + 90), coord_y(loc[i].y, radius, loc[i].a + 90), k, a, loc[i].k, loc[i].a)) return false;/*left-left*/
+		if (check(coord_x(x, radius, a + 90), coord_y(y, radius, a + 90), coord_x(loc[i].x, radius, loc[i].a - 90), coord_y(loc[i].y, radius, loc[i].a - 90), k, a, loc[i].k, loc[i].a)) return false; /*left-right*/
+		if (check(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), coord_x(loc[i].x, radius, loc[i].a + 90), coord_y(loc[i].y, radius, loc[i].a + 90), k, a, loc[i].k, loc[i].a)) return false; /*right-left*/
+		if (check(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), coord_x(loc[i].x, radius, loc[i].a - 90), coord_y(loc[i].y, radius, loc[i].a - 90), k, a, loc[i].k, loc[i].a)) return false; /*right-right*/
 		
-		if (check(x1_l, y1_l, x2_l, y2_l, k, a, loc[i].k, loc[i].a)) return false;/*left-left*/
-		if (check(x1_l, y1_l, x2_r, y2_r, k, a, loc[i].k, loc[i].a)) return false; /*left-right*/
-		if (check(x1_r, y1_r, x2_l, y2_l, k, a, loc[i].k, loc[i].a)) return false; /*right-left*/
-		if (check(x1_r, y1_r, x2_r, y2_r, k, a, loc[i].k, loc[i].a)) return false; /*right-right*/
 		
-		
-		if (belong(x1_l, y1_l, loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
-		if (belong(x1_r, y1_r, loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
-		if (belong(coord_x(x1_l, k, a), coord_y(y1_l, k, a), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
-		if (belong(coord_x(x1_r, k, a), coord_y(y1_r, k, a), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
+		if (belong(coord_x(x, radius, a + 90), coord_y(y, radius, a + 90), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
+		if (belong(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
+		if (belong(coord_x(coord_x(x, radius, a + 90), k, a), coord_y(coord_y(y, radius, a + 90), k, a), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
+		if (belong(coord_x(coord_x(x, radius, a - 90), k, a), coord_y(coord_y(y, radius, a - 90), k, a), loc[i].x, loc[i].y, loc[i].k, loc[i].a)) return false;
 
 
-		if (belong(x2_l, y2_l, x, y, k, a)) return false;
-		if (belong(x2_r, y2_r, x, y, k, a)) return false;
-		if (belong(coord_x(x2_l, loc[i].k, loc[i].a), coord_y(y2_l, loc[i].k, loc[i].a), x, y, k, a)) return false;
-		if (belong(coord_x(x2_r, loc[i].k, loc[i].a), coord_y(y2_r, loc[i].k, loc[i].a), x, y, k, a)) return false;
+		if (belong(coord_x(loc[i].x, radius, loc[i].a + 90), coord_y(loc[i].y, radius, loc[i].a + 90), x, y, k, a)) return false;
+		if (belong(coord_x(loc[i].x, radius, loc[i].a - 90), coord_y(loc[i].y, radius, loc[i].a - 90), x, y, k, a)) return false;
+		if (belong(coord_x(coord_x(loc[i].x, radius, loc[i].a + 90), loc[i].k, loc[i].a), coord_y(coord_y(loc[i].y, radius, loc[i].a + 90), loc[i].k, loc[i].a), x, y, k, a)) return false;
+		if (belong(coord_x(coord_x(loc[i].x, radius, loc[i].a - 90), loc[i].k, loc[i].a), coord_y(coord_y(loc[i].y, radius, loc[i].a - 90), loc[i].k, loc[i].a), x, y, k, a)) return false;
 
 	}
 	return true;
 }
-
 bool test(double x, double y, double k, int a) //true - Û‰‡˜ÌÓÂ ‡ÒÔÓÎÓÊÂÌËÂ
 {
 	if (!all_test(x, y, k, a, cnt) || !all_test(x, y, k, a, cnt_trans)) return false;
@@ -276,52 +276,30 @@ string toStr(int number)
 }
 
 
-
-void t(double x, double y, double k, int a)
+void trans(double x, double y, double k, int a, double x_add, double y_add, double k_add, int a_add)
 {
-	if (belong(coord_x(x, radius, a + 90), coord_y(y, radius, a + 90))) f[0] = true;
-	if (belong(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90))) f[1] = true;
-	if (belong(coord_x(coord_x(x, radius, a + 90), k, a), coord_y(coord_y(y, radius, a + 90), k, a))) f[2] = true;
-	if (belong(coord_x(coord_x(x, radius, a - 90), k, a), coord_y(coord_y(y, radius, a - 90), k, a))) f[3] = true;
-}
-void trans(double x, double y, double k, int a) 
-{
-	if ((coord_x(x, radius, a + 90) < 0 && !f[0]) || (coord_x(x, radius, a - 90) < 0 && !f[1]) ||
-		(coord_x(coord_x(x, radius, a + 90), k, a) < 0 && !f[2]) || (coord_x(coord_x(x, radius, a - 90), k, a) < 0 &&f[3]))
+	if (x >= L / 2.0)
 	{
-		cnt_trans.push_back(CNT(x + L, y, a, k));
-		draw_CNT(x + L, y, k, a);
-		t(x + L, y, k, a);
-		trans(x + L, y, k, a);
-		return;
-	}
+		if (check(x, y, 0, L, k, a, L, 0))
+		{
+			//—ﬁƒ¿ ƒŒ¡¿¬»“‹ œ–Œ¬≈– ”!!!!!!!!!!!!!!!!!!!!!!!!!
+			//≈—À» ŒÕ¿ ≈Ÿ≈ Õ≈ ¡€À¿ ƒŒ¡¿¬À≈Õ¿, “ŒÀ‹ Œ “Œ√ƒ¿ ƒŒ¡¿¬Àﬂ“‹ 
+			cnt_trans.push_back(CNT(x_add, y_add - L, a_add, k_add));
+			draw_CNT(x_add, y_add, k_add, a_add);
+		}
 
-	if ((coord_x(x, radius, a + 90) > L && !f[0]) || (coord_x(x, radius, a - 90) > L && !f[1]) ||
-		(coord_x(coord_x(x, radius, a + 90), k, a) > L && !f[2]) || (coord_x(coord_x(x, radius, a - 90), k, a) > L && !f[3]))
-	{
-		cnt_trans.push_back(CNT(x - L, y, a, k));
-		draw_CNT(x - L, y, k, a);
-		t(x - L, y, k, a);
-		trans(x - L, y, k, a);
-		return;
+		if (check(x, y, 0, 0, k, a, L, 0))
+		{
+			//—ﬁƒ¿ ƒŒ¡¿¬»“‹ œ–Œ¬≈– ”!!!!!!!!!!!!!!!!!!!!!!!!!
+			//≈—À» ŒÕ¿ ≈Ÿ≈ Õ≈ ¡€À¿ ƒŒ¡¿¬À≈Õ¿, “ŒÀ‹ Œ “Œ√ƒ¿ ƒŒ¡¿¬Àﬂ“‹ 
+			cnt_trans.push_back(CNT(x_add, y_add + L, a_add, k_add));
+			draw_CNT(x_add, y_add, k_add, a_add);
+		}
+
 	}
-	if ((coord_y(y, radius, a + 90) < 0 && !f[0]) || (coord_y(y, radius, a - 90) < 0 && !f[1]) ||
-		(coord_y(coord_y(y, radius, a + 90), k, a) < 0 && !f[2]) || (coord_y(coord_y(y, radius, a - 90), k, a) < 0 && !f[3]))
+	else
 	{
-		cnt_trans.push_back(CNT(x, y + L, a, k));
-		draw_CNT(x, y + L, k, a);
-		t(x, y + L, k, a);
-		trans(x, y + L, k, a);
-		return;
-	}
-	if ((coord_y(y, radius, a + 90) > L && !f[0]) || (coord_y(y, radius, a - 90) > L && !f[1]) ||
-		(coord_y(coord_y(y, radius, a + 90), k, a) > L && !f[2]) || (coord_y(coord_y(y, radius, a - 90), k, a) > L && !f[3]))
-	{
-		cnt_trans.push_back(CNT(x, y - L, a, k));
-		draw_CNT(x, y - L, k, a);
-		t(x, y - L, k, a);
-		trans(x, y - L, k, a);
-		return;
+
 	}
 }
 void packaging()
@@ -354,14 +332,8 @@ void packaging()
 		{
 			cnt.push_back(CNT(x, y, a, k));
 			draw_CNT(x, y, k, a);
-			for (int i = 0; i < 4; i++)
-				f[i] = false;
+			
 
-			t(x, y, k, a);
-
-			for (int i = 0; i < 4; i++)
-				if(!f[i]) trans(x, y, k, a);
-			/*
 			double x1 = coord_x(x, radius, a + 90);
 			double y1 = coord_y(y, radius, a + 90);
 
@@ -373,7 +345,12 @@ void packaging()
 
 			double x4 = coord_x(x1, k, a);
 			double y4 = coord_y(y1, k, a);
-			*/
+			 
+			if (!belong(x1, y1) || !belong(x2, y2) || !belong(x3, y3) || !belong(x4, y4))
+			{
+				trans(x1, y1, radius * 2, a - 90, x, y, k, a);
+
+			}
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
 		}
 	}
