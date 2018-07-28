@@ -36,17 +36,17 @@ int GraphInConsole()
 	HDC hDC = GetDC(GetConsoleWindow());
 	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
 	SelectObject(hDC, Pen);
-	MoveToEx(hDC, 10, 100, NULL); // -
-	LineTo(hDC, 10 + L, 100);
+	MoveToEx(hDC, 50, 130, NULL); // -
+	LineTo(hDC, 50 + L, 130);
 
-	MoveToEx(hDC, 10, 100 + L, NULL); // -
-	LineTo(hDC, 10 + L, 100 + L);
+	MoveToEx(hDC, 50, 130 + L, NULL); // -
+	LineTo(hDC, 50 + L, 130 + L);
 
-	MoveToEx(hDC, 10 + L, 100, NULL); // |
-	LineTo(hDC, 10 + L, 100 + L);
+	MoveToEx(hDC, 50 + L, 130, NULL); // |
+	LineTo(hDC, 50 + L, 130 + L);
 
-	MoveToEx(hDC, 10, 100, NULL); // |
-	LineTo(hDC, 10, 100 + L);
+	MoveToEx(hDC, 50, 130, NULL); // |
+	LineTo(hDC, 50, 130 + L);
 
 	return 0;
 }
@@ -60,16 +60,16 @@ void intersect(double a1, double a2, double b1, double b2, double c1, double c2,
 	x = (b1 * c2 - b2 * c1) / (a1 * b2 - a2 * b1);
 	y = (a2 * c1 - a1 * c2) / (a1 * b2 - a2 * b1);
 }
-double coord_x(double x, double k, int a)
+double coord_x(double x, double k, double a)
 {
-	return x + k * cos(a);
+	return x + k * cos((a*M_PI)/180.0);
 }
-double coord_y(double y, double k, int a)
+double coord_y(double y, double k, double a)
 {
-	return y + k * sin(a);
+	return y + k * sin((a*M_PI) / 180.0);
 }
 
-void draw_CNT(double x, double y, double k, int a)
+void draw_CNT(double x, double y, double k, double a)
 {
 	double x1_l = coord_x(x, radius, a + 90);
 	double y1_l = coord_y(y, radius, a + 90);
@@ -90,18 +90,18 @@ void draw_CNT(double x, double y, double k, int a)
 	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
 	SelectObject(hDC, Pen);
 
-	MoveToEx(hDC, x1_l + 10, y1_l + 100, NULL);
-	LineTo(hDC, x2_l + 10, y2_l + 100);
+	MoveToEx(hDC, x1_l + 50, y1_l + 130, NULL);
+	LineTo(hDC, x2_l + 50, y2_l + 130);
 
-	MoveToEx(hDC, x1_r + 10, y1_r + 100, NULL);
-	LineTo(hDC, x2_r + 10, y2_r + 100);
+	MoveToEx(hDC, x1_r + 50, y1_r + 130, NULL);
+	LineTo(hDC, x2_r + 50, y2_r + 130);
 
 
-	MoveToEx(hDC, x1_l + 10, y1_l + 100, NULL);
-	LineTo(hDC, x1_r + 10, y1_r + 100);
+	MoveToEx(hDC, x1_l + 50, y1_l + 130, NULL);
+	LineTo(hDC, x1_r + 50, y1_r + 130);
 
-	MoveToEx(hDC, x2_l + 10, y2_l + 100, NULL);
-	LineTo(hDC, x2_r + 10, y2_r + 100);
+	MoveToEx(hDC, x2_l + 50, y2_l + 130, NULL);
+	LineTo(hDC, x2_r + 50, y2_r + 130);
 
 
 }
@@ -116,9 +116,9 @@ bool min_distance(double x1, double y1, double x2, double y2, double x, double y
 	double b = d(x1, y1, x2, y2);
 	double c = d(x1, y1, x, y);
 	if (c <= radius * 0.154) return false;
-	double A = (180.0 / M_PI) * acos((b*b+c*c-a*a) / (2.0*b*c));
+	double A = (180.0 / M_PI) * acos(((b*b+c*c-a*a) / (2.0*b*c))*M_PI/180.0);
 	if (A == 0) return false;
-	double C = (180.0 / M_PI) * acos((b*b+a*a-c*c) / (2.0*b*a));
+	double C = (180.0 / M_PI) * acos(((b*b+a*a-c*c) / (2.0*b*a))*M_PI / 180.0);
 	if (C == 0) return false;
 	if (A > 90 || C > 90) return true; // можно не проверять
 	double p = (d(x1, y1, x2, y2) + d(x1, y1, x, y) + d(x2, y2, x, y)) / 2.0;
@@ -154,6 +154,19 @@ bool belong(double x, double y, double _x, double _y, double k, double a) //true
 	double x4 = coord_x(x1, k, a);
 	double y4 = coord_y(y1, k, a);
 
+	/*
+	HDC hDC = GetDC(GetConsoleWindow());
+	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
+	SelectObject(hDC, Pen);
+
+
+	MoveToEx(hDC, x1 + 50+1, y1 + 130 + 1, NULL);
+	LineTo(hDC, x2 + 50 + 1, y2 + 130 + 1);
+
+	MoveToEx(hDC, x3 + 50 + 1, y3 + 130 + 1, NULL);
+	LineTo(hDC, x4 + 50 + 1, y4 + 130 + 1);
+	*/
+
 	double k1 = (y2 - y1) / (x2 - x1);
 	double k2 = (y4 - y1) / (x4 - x1);
 
@@ -167,7 +180,7 @@ bool belong(double x, double y, double _x, double _y, double k, double a) //true
 	return false;
 }
 
-bool check(double x1, double y1, double x2, double y2, double k1, int al1, double k2, int al2) //true - пересекаются
+bool check(double x1, double y1, double x2, double y2, double k1, double al1, double k2, double al2) //true - пересекаются
 {
 	double a1, a2, b1, b2, c1, c2;
 	double x, y; //(x,y) - точка пересечения прямых
@@ -177,7 +190,20 @@ bool check(double x1, double y1, double x2, double y2, double k1, int al1, doubl
 
 	double x4 = coord_x(x2, k2, al2);
 	double y4 = coord_y(y2, k2, al2);
+
+	HDC hDC = GetDC(GetConsoleWindow());
+	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(255, 0, 120));
+	SelectObject(hDC, Pen);
+
+
+	MoveToEx(hDC, x1 + 50 + 1, y1 + 130 + 1, NULL);
+	LineTo(hDC, coord_x(x1, k1, al1) + 50 + 1, coord_y(y1, k1, al1) + 130 + 1);
+
+	MoveToEx(hDC, x2 + 50 + 1, y2 + 130 + 1, NULL);
+	LineTo(hDC, coord_x(x2, k2, al2) + 50 + 1, coord_y(y2, k2, al2) + 130 + 1);
 	*/
+
+	
 	equation(x1, y1, coord_x(x1, k1, al1), coord_y(y1, k1, al1), a1, b1, c1);
 	equation(x2, y2, coord_x(x2, k2, al2), coord_y(y2, k2, al2), a2, b2, c2);
 
@@ -185,16 +211,17 @@ bool check(double x1, double y1, double x2, double y2, double k1, int al1, doubl
 	{
 		intersect(a1, a2, b1, b2, c1, c2, x, y); //(x,y) - точка пересечения прямых
 
-		double k1 = (y2 - y1) / (x2 - x1);
-		double k2 = (coord_y(y2, k2, al2) - y1) / (coord_x(x2, k2, al2) - x1);
+		double k_1 = (y2 - y1) / (x2 - x1);
+		double k_2 = (coord_y(y2, k2, al2) - y1) / (coord_x(x2, k2, al2) - x1);
 
-		if ((k1*(x - x1) - (y - y1))*(k1*(x - coord_x(x1, k1, al1)) - (y - coord_y(y1, k1, al1))) < 0 && (k2*(x - x1) - (y - y1))*(k2*(x - x2) - (y - y2)) < 0)
+		if ((k_1*(x - x1) - (y - y1))*(k_1*(x - coord_x(x1, k1, al1)) - (y - coord_y(y1, k1, al1))) < 0 && 
+			(k_2*(x - x1) - (y - y1))*(k_2*(x - x2) - (y - y2)) < 0)
 			return true;
 	}
 	return false;
 }
 
-bool all_test(double x, double y, double k, int a, vector<CNT>loc) //true - удачное расположение
+bool all_test(double x, double y, double k, double a, vector<CNT>loc) //true - удачное расположение
 {
 	for (int i = 0; i < loc.size(); i++)
 	{
@@ -235,7 +262,7 @@ bool all_test(double x, double y, double k, int a, vector<CNT>loc) //true - удач
 	}
 	return true;
 }
-bool test(double x, double y, double k, int a) //true - удачное расположение
+bool test(double x, double y, double k, double a) //true - удачное расположение
 {
 	if (!all_test(x, y, k, a, cnt) || !all_test(x, y, k, a, cnt_trans)) return false;
 
@@ -275,32 +302,71 @@ string toStr(int number)
 	return ss.str();
 }
 
-
-void trans(double x, double y, double k, int a, double x_add, double y_add, double k_add, int a_add)
+bool coincides(double x, double y) //true - трубка с такими координатами уже добавлена
 {
-	if (x >= L / 2.0)
+	if (cnt_trans.size() == 0) return false;
+	if (cnt_trans.size() == 1)
 	{
-		if (check(x, y, 0, L, k, a, L, 0))
-		{
-			//СЮДА ДОБАВИТЬ ПРОВЕРКУ!!!!!!!!!!!!!!!!!!!!!!!!!
-			//ЕСЛИ ОНА ЕЩЕ НЕ БЫЛА ДОБАВЛЕНА, ТОЛЬКО ТОГДА ДОБАВЛЯТЬ 
-			cnt_trans.push_back(CNT(x_add, y_add - L, a_add, k_add));
-			draw_CNT(x_add, y_add, k_add, a_add);
-		}
-
-		if (check(x, y, 0, 0, k, a, L, 0))
-		{
-			//СЮДА ДОБАВИТЬ ПРОВЕРКУ!!!!!!!!!!!!!!!!!!!!!!!!!
-			//ЕСЛИ ОНА ЕЩЕ НЕ БЫЛА ДОБАВЛЕНА, ТОЛЬКО ТОГДА ДОБАВЛЯТЬ 
-			cnt_trans.push_back(CNT(x_add, y_add + L, a_add, k_add));
-			draw_CNT(x_add, y_add, k_add, a_add);
-		}
-
+		if (cnt_trans[0].x == x && cnt_trans[0].y == y) return true;
+		else return false;
 	}
-	else
+	if (cnt_trans.size() == 2)
 	{
-
+		if ((cnt_trans[0].x == x && cnt_trans[0].y == y) ||
+			(cnt_trans[1].x == x && cnt_trans[1].y == y)) return true;
+		else return false;
 	}
+	
+	for (int i = 1; i < 4; i++)
+		if (cnt_trans[cnt_trans.size()-i].x == x && cnt_trans[cnt_trans.size() - i].y == y) return true;
+	
+	return false;
+}
+
+void trans(double x, double y, double k, double a, double x_add, double y_add, double k_add, double a_add, int flag)
+{
+	if (flag == 2) return;
+	if (check(x, y, -L/3.0, L, k, a, 5.0 * L/3.0, 0) && !coincides(x_add, y_add - L))
+	{
+		
+		cnt_trans.push_back(CNT(x_add, y_add - L, a_add, k_add));
+		draw_CNT(x_add, y_add - L, k_add, a_add);
+		trans(x, y - L, k, a, x_add, y_add - L, k_add, a_add, flag+1);
+	}
+
+	if (check(x, y, -L / 3.0, 0, k, a, 5.0 * L / 3.0, 0) && !coincides(x_add, y_add + L))
+	{
+		cnt_trans.push_back(CNT(x_add, y_add + L, a_add, k_add));
+		draw_CNT(x_add, y_add + L, k_add, a_add);
+		trans(x, y + L, k, a, x_add, y_add + L, k_add, a_add, flag + 1);
+	}
+
+	if (check(x, y, L, -L / 3.0, k, a, 5.0 * L / 3.0, 90) && !coincides(x_add - L, y_add))
+	{
+		cnt_trans.push_back(CNT(x_add - L, y_add, a_add, k_add));
+		draw_CNT(x_add - L, y_add, k_add, a_add);
+		trans(x - L, y, k, a, x_add - L, y_add, k_add, a_add, flag + 1);
+	}
+
+	if (check(x, y, 0, - L / 3.0, k, a, 5.0 * L / 3.0, 90) && !coincides(x_add + L, y_add))
+	{
+		cnt_trans.push_back(CNT(x_add + L, y_add, a_add, k_add));
+		draw_CNT(x_add + L, y_add, k_add, a_add);
+		trans(x + L, y, k, a, x_add + L, y_add, k_add, a_add, flag + 1);
+	}
+	/*
+	HDC hDC = GetDC(GetConsoleWindow());
+	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(2, 255, 255));
+	SelectObject(hDC, Pen);
+
+
+	MoveToEx(hDC, -L / 3.0 + 10, L + 100, NULL);
+	LineTo(hDC, coord_x(-L / 3.0, 5.0 * L / 3.0, 0) + 10, coord_y(L, 5.0 * L / 3.0, 0) + 100);
+
+	MoveToEx(hDC, L + 10, -L / 3.0 + 100, NULL);
+	LineTo(hDC, coord_x( L, 5.0 * L / 3.0, M_PI/2.0) + 10, coord_y(-L / 3.0, 5.0 * L / 3.0, M_PI / 2.0) + 100);
+	*/
+
 }
 void packaging()
 {
@@ -348,8 +414,10 @@ void packaging()
 			 
 			if (!belong(x1, y1) || !belong(x2, y2) || !belong(x3, y3) || !belong(x4, y4))
 			{
-				trans(x1, y1, radius * 2, a - 90, x, y, k, a);
-
+				trans(x1, y1, radius*2, a - 90, x, y, k, a,0);
+				trans(x1, y1, k, a, x, y, k, a,0);
+				trans(x4, y4, radius*2, a - 90, x, y, k, a,0);
+				trans(x2, y2, k, a, x, y, k, a,0);
 			}
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
 		}
@@ -383,8 +451,16 @@ void main()
 	packaging();
 	double finish = clock();
 	cout << "meow! " << endl;
+	for (int i = 0; i < cnt_trans.size(); i++)
+	{
+		dd << cnt_trans[i].x << endl;
+	}
+	dd << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl;
 
-
+	for (int i = 0; i < cnt_trans.size(); i++)
+	{
+		dd << cnt_trans[i].y << endl;
+	}
 	file.close();
 	raspr.close();
 	delete[]f;
