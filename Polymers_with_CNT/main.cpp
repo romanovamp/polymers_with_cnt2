@@ -302,57 +302,44 @@ string toStr(int number)
 	return ss.str();
 }
 
-bool coincides(double x, double y) //true - трубка с такими координатами уже добавлена
+bool coincides(double x, double y, double x_real, double y_real) //true - трубка с такими координатами уже добавлена
 {
-	if (cnt_trans.size() == 0) return false;
-	if (cnt_trans.size() == 1)
-	{
-		if (cnt_trans[0].x == x && cnt_trans[0].y == y) return true;
-		else return false;
-	}
-	if (cnt_trans.size() == 2)
-	{
-		if ((cnt_trans[0].x == x && cnt_trans[0].y == y) ||
-			(cnt_trans[1].x == x && cnt_trans[1].y == y)) return true;
-		else return false;
-	}
-	
-	for (int i = 1; i < 4; i++)
-		if (cnt_trans[cnt_trans.size()-i].x == x && cnt_trans[cnt_trans.size() - i].y == y) return true;
-	
+	if (x == x_real && y == y_real) return true; 
+	for (int i = 1; i < 4 && cnt_trans.size() >= i; i++)
+		if (cnt_trans[cnt_trans.size() - i].x == x && cnt_trans[cnt_trans.size() - i].y == y) return true;
 	return false;
 }
 
-void trans(double x, double y, double k, double a, double x_add, double y_add, double k_add, double a_add, int flag)
+void trans(double x, double y, double k, double a, double x_add, double y_add, double k_add, double a_add, int flag, double x_real, double y_real)
 {
-	if (flag == 2) return;
-	if (check(x, y, -L/3.0, L, k, a, 5.0 * L/3.0, 0) && !coincides(x_add, y_add - L))
+	if (flag == 3) return; //мы можем перенести к-мер максимум 3 раза
+	if (!coincides(x_add, y_add - L, x_real, y_real) && check(x, y, -L/3.0, L, k, a, 5.0 * L/3.0, 0))
 	{
 		
 		cnt_trans.push_back(CNT(x_add, y_add - L, a_add, k_add));
 		draw_CNT(x_add, y_add - L, k_add, a_add);
-		trans(x, y - L, k, a, x_add, y_add - L, k_add, a_add, flag+1);
+		trans(x, y - L, k, a, x_add, y_add - L, k_add, a_add, flag+1, x_real, y_real);
 	}
 
-	if (check(x, y, -L / 3.0, 0, k, a, 5.0 * L / 3.0, 0) && !coincides(x_add, y_add + L))
+	if (!coincides(x_add, y_add + L, x_real, y_real) && check(x, y, -L / 3.0, 0, k, a, 5.0 * L / 3.0, 0))
 	{
 		cnt_trans.push_back(CNT(x_add, y_add + L, a_add, k_add));
 		draw_CNT(x_add, y_add + L, k_add, a_add);
-		trans(x, y + L, k, a, x_add, y_add + L, k_add, a_add, flag + 1);
+		trans(x, y + L, k, a, x_add, y_add + L, k_add, a_add, flag + 1, x_real, y_real);
 	}
 
-	if (check(x, y, L, -L / 3.0, k, a, 5.0 * L / 3.0, 90) && !coincides(x_add - L, y_add))
+	if (!coincides(x_add - L, y_add, x_real, y_real) && check(x, y, L, -L / 3.0, k, a, 5.0 * L / 3.0, 90))
 	{
 		cnt_trans.push_back(CNT(x_add - L, y_add, a_add, k_add));
 		draw_CNT(x_add - L, y_add, k_add, a_add);
-		trans(x - L, y, k, a, x_add - L, y_add, k_add, a_add, flag + 1);
+		trans(x - L, y, k, a, x_add - L, y_add, k_add, a_add, flag + 1, x_real, y_real);
 	}
 
-	if (check(x, y, 0, - L / 3.0, k, a, 5.0 * L / 3.0, 90) && !coincides(x_add + L, y_add))
+	if (!coincides(x_add + L, y_add, x_real, y_real) && check(x, y, 0, - L / 3.0, k, a, 5.0 * L / 3.0, 90))
 	{
 		cnt_trans.push_back(CNT(x_add + L, y_add, a_add, k_add));
 		draw_CNT(x_add + L, y_add, k_add, a_add);
-		trans(x + L, y, k, a, x_add + L, y_add, k_add, a_add, flag + 1);
+		trans(x + L, y, k, a, x_add + L, y_add, k_add, a_add, flag + 1, x_real, y_real);
 	}
 	/*
 	HDC hDC = GetDC(GetConsoleWindow());
@@ -414,10 +401,10 @@ void packaging()
 			 
 			if (!belong(x1, y1) || !belong(x2, y2) || !belong(x3, y3) || !belong(x4, y4))
 			{
-				trans(x1, y1, radius*2, a - 90, x, y, k, a,0);
-				trans(x1, y1, k, a, x, y, k, a,0);
-				trans(x4, y4, radius*2, a - 90, x, y, k, a,0);
-				trans(x2, y2, k, a, x, y, k, a,0);
+				trans(x1, y1, radius*2, a - 90, x, y, k, a,0, x, y);
+				trans(x1, y1, k, a, x, y, k, a,0, x, y);
+				trans(x4, y4, radius*2, a - 90, x, y, k, a,0, x, y);
+				trans(x2, y2, k, a, x, y, k, a,0, x, y);
 			}
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
 		}
