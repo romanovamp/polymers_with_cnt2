@@ -16,7 +16,7 @@ using namespace std;
 //************************************************************************
 int L;
 double mean, devi, radius;
-int n;
+double p;
 vector <CNT> cnt(0);
 vector <CNT> cnt_trans(0);
 
@@ -359,7 +359,8 @@ void packaging()
 {
 	double x, y, k;
 	int a, kol = 0;
-	for (int i = 0; i < n; i++)
+	double S = L * L * p;
+	while (S >= 0)
 	{
 		flag = false;
 		kol = 0;
@@ -375,7 +376,6 @@ void packaging()
 			}
 			else
 			{
-				n--;
 				break;
 			}
 			kol++;
@@ -407,6 +407,7 @@ void packaging()
 				trans(x2, y2, k, a, x, y, k, a,0, x, y);
 			}
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
+			S -= k * radius * 2.0;
 		}
 	}
 }
@@ -423,12 +424,12 @@ void main()
 	cout << "Радиус трубки: ";
 	cin >> radius;
 	cout << "Количество трубок: ";
-	cin >> n;
+	cin >> p;
 	
 
 	file << "Размер квадрата: " << L << endl;
 	file << "Средняя длина трубки: " << mean << endl;
-	file << "Количество трубок: " << n << endl;
+	file << "Плотность: " << p << endl;
 
 	GraphInConsole();
 	devi = mean * 0.1 / 3.0;
@@ -451,7 +452,7 @@ void main()
 	file.close();
 	raspr.close();
 	delete[]f;
-	cout << "Упаковано " << n << " за " << (finish-start)/CLOCKS_PER_SEC << "c." << endl;
+	cout << "Упаковано " << cnt.size() << " за " << (finish-start)/CLOCKS_PER_SEC << "c." << endl;
 
 }
 
