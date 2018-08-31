@@ -24,7 +24,6 @@ ofstream file("coordinates.txt"), raspr("rasp.txt");
 ofstream dd("coos.txt");
 //ofstream aa("a.txt"), kk("k.txt");
 bool flag;
-bool *f = new bool[4];
 MtRng64 mt;
 bool ready = false;
 double second = 0.0;
@@ -359,8 +358,8 @@ void packaging()
 {
 	double x, y, k;
 	int a, kol = 0;
-	double S = L * L * p;
-	while (S >= 0)
+	double S = 0;
+	while (S < L * L * p)
 	{
 		flag = false;
 		kol = 0;
@@ -376,6 +375,9 @@ void packaging()
 			}
 			else
 			{
+				
+				cout << "Реальная плотность: "<< S / (L*L) << endl;
+				S = L * L * p;
 				break;
 			}
 			kol++;
@@ -407,15 +409,15 @@ void packaging()
 				trans(x2, y2, k, a, x, y, k, a,0, x, y);
 			}
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
-			S -= k * radius * 2.0;
+			S += k * radius * 2.0;
 		}
 	}
+	cout << "Реальная плотность: " << S / (L*L) << endl;
 }
 
 
 void main()
 {
-	f = new bool[4];
 	setlocale(LC_ALL, "rus");
 	cout << "Размер квадрата: ";
 	cin >> L;
@@ -423,7 +425,7 @@ void main()
 	cin >> mean;
 	cout << "Радиус трубки: ";
 	cin >> radius;
-	cout << "Количество трубок: ";
+	cout << "Плотность: ";
 	cin >> p;
 	
 
@@ -451,9 +453,8 @@ void main()
 	}
 	file.close();
 	raspr.close();
-	delete[]f;
 	cout << "Упаковано " << cnt.size() << " за " << (finish-start)/CLOCKS_PER_SEC << "c." << endl;
-
+	cin >> p; 
 }
 
 
