@@ -364,7 +364,8 @@ void packaging()
 		flag = false;
 		kol = 0;
 		k = bm();
-		
+		while (k < mean - devi || k > mean + devi)
+			k = bm();
 		a = (int)(mt.getReal1() * 360);
 		do
 		{
@@ -388,7 +389,6 @@ void packaging()
 			cnt.push_back(CNT(x, y, a, k));
 			draw_CNT(x, y, k, a);
 			
-
 			double x1 = coord_x(x, radius, a + 90);
 			double y1 = coord_y(y, radius, a + 90);
 
@@ -434,7 +434,7 @@ void main()
 	file << "Плотность: " << p << endl;
 
 	GraphInConsole();
-	devi = mean * 0.1 / 3.0;
+	devi = mean * 0.1;
 	file << setw(7) << "x" << "|" << setw(7) << "y" << "|" << setw(7) << "k" << "|" << endl;
 
 	double start = clock();

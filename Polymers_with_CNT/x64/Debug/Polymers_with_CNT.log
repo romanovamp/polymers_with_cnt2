@@ -1,14 +1,1 @@
-﻿  main.cpp
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(92): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(93): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(95): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(96): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(99): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(100): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(102): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(103): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(318): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(325): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(332): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\user\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(339): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-  Polymers_with_CNT.vcxproj -> C:\Users\user\Desktop\polymers_with_cnt2\x64\Debug\Polymers_with_CNT.exe
+﻿  Polymers_with_CNT.vcxproj -> C:\Users\Марина\Desktop\polymers_with_cnt2\x64\Debug\Polymers_with_CNT.exe
