@@ -9,6 +9,7 @@
 #include <vector>
 #include "Header.h"
 #include "CNT.h"
+#include "CNTInfo.h"
 #include <ctime>
 
 using namespace std;
@@ -18,7 +19,8 @@ int L;
 double mean, devi, radius;
 double p;
 vector <CNT> cnt(0);
-vector <CNT> cnt_trans(0);
+vector <CNT> cntTrans(0);
+vector <CNTInfo> cntInfo(0);
 
 ofstream file("coordinates.txt"), raspr("rasp.txt");
 ofstream dd("coos.txt");
@@ -127,7 +129,7 @@ bool min_distance(double x1, double y1, double x2, double y2, double x, double y
 
 
 void equation(double x1, double y1, double x2, double y2, double &a, double &b, double &c) // уравнение прямой 
-{
+{ 
 	a = y1 - y2;
 	b = x2 - x1;
 	c = x1 * y2 - x2 * y1;
@@ -263,12 +265,12 @@ bool all_test(double x, double y, double k, double a, vector<CNT>loc) //true - у
 }
 bool test(double x, double y, double k, double a) //true - удачное расположение
 {
-	if (!all_test(x, y, k, a, cnt) || !all_test(x, y, k, a, cnt_trans)) return false;
+	if (!all_test(x, y, k, a, cnt) || !all_test(x, y, k, a, cntTrans)) return false;
 
-	if (coord_x(x, k, a) < 0) if (!all_test(x + L, y, k, a, cnt) || !all_test(x + L, y, k, a, cnt_trans)) return false;
-	if (coord_x(x, k, a) > L) if (!all_test(x - L, y, k, a, cnt) || !all_test(x - L, y, k, a, cnt_trans)) return false;
-	if (coord_y(y, k, a) < 0) if (!all_test(x, y + L, k, a, cnt) || !all_test(x, y + L, k, a, cnt_trans)) return false;
-	if (coord_y(y, k, a) > L) if (!all_test(x, y - L, k, a, cnt) || !all_test(x, y - L, k, a, cnt_trans)) return false;
+	if (coord_x(x, k, a) < 0) if (!all_test(x + L, y, k, a, cnt) || !all_test(x + L, y, k, a, cntTrans)) return false;
+	if (coord_x(x, k, a) > L) if (!all_test(x - L, y, k, a, cnt) || !all_test(x - L, y, k, a, cntTrans)) return false;
+	if (coord_y(y, k, a) < 0) if (!all_test(x, y + L, k, a, cnt) || !all_test(x, y + L, k, a, cntTrans)) return false;
+	if (coord_y(y, k, a) > L) if (!all_test(x, y - L, k, a, cnt) || !all_test(x, y - L, k, a, cntTrans)) return false;
 
 	flag = true; //удачное расположение + рисуем
 	return true;
@@ -301,58 +303,59 @@ string toStr(int number)
 	return ss.str();
 }
 
-bool coincides(double x, double y, double x_real, double y_real) //true - трубка с такими координатами уже добавлена
+bool coincides(double x, double y) //true - трубка с такими координатами уже добавлена
 {
-	if (x == x_real && y == y_real) return true; 
-	for (int i = 1; i < 4 && cnt_trans.size() >= i; i++)
-		if (cnt_trans[cnt_trans.size() - i].x == x && cnt_trans[cnt_trans.size() - i].y == y) return true;
+	for (int i = 1; i < 4 && cntTrans.size() >= i; i++)
+		if (cntTrans[cntTrans.size() - i].x == x && cntTrans[cntTrans.size() - i].y == y) return true;
 	return false;
 }
 
-void trans(double x, double y, double k, double a, double x_add, double y_add, double k_add, double a_add, int flag, double x_real, double y_real)
+void trans(double x, double y, int id) //добавление трубки в cntTrans
 {
-	if (flag == 3) return; //мы можем перенести к-мер максимум 3 раза
-	if (!coincides(x_add, y_add - L, x_real, y_real) && check(x, y, -L/3.0, L, k, a, 5.0 * L/3.0, 0))
+	if (x < 0 && !coincides(cnt[id].x + L, cnt[id].y)) //лево
 	{
-		
-		cnt_trans.push_back(CNT(x_add, y_add - L, a_add, k_add));
-		draw_CNT(x_add, y_add - L, k_add, a_add);
-		trans(x, y - L, k, a, x_add, y_add - L, k_add, a_add, flag+1, x_real, y_real);
+		cntTrans.push_back(CNT(cnt[id].x + L, cnt[id].y, cnt[id].a, cnt[id].k));
+		draw_CNT(cnt[id].x + L, cnt[id].y, cnt[id].k, cnt[id].a);
+
+		if (y < 0 && !coincides(cnt[id].x + L, cnt[id].y + L)) //левый нижний угол
+		{
+			cntTrans.push_back(CNT(cnt[id].x + L, cnt[id].y + L, cnt[id].a, cnt[id].k));
+			draw_CNT(cnt[id].x + L, cnt[id].y + L, cnt[id].k, cnt[id].a);
+		}
+		if (y > L && !coincides(cnt[id].x + L, cnt[id].y - L)) //правый нижний угол
+		{
+			cntTrans.push_back(CNT(cnt[id].x + L, cnt[id].y - L, cnt[id].a, cnt[id].k));
+			draw_CNT(cnt[id].x + L, cnt[id].y - L, cnt[id].k, cnt[id].a);
+		}
 	}
 
-	if (!coincides(x_add, y_add + L, x_real, y_real) && check(x, y, -L / 3.0, 0, k, a, 5.0 * L / 3.0, 0))
+	if (x > L && !coincides(cnt[id].x - L, cnt[id].y)) //право
 	{
-		cnt_trans.push_back(CNT(x_add, y_add + L, a_add, k_add));
-		draw_CNT(x_add, y_add + L, k_add, a_add);
-		trans(x, y + L, k, a, x_add, y_add + L, k_add, a_add, flag + 1, x_real, y_real);
+		cntTrans.push_back(CNT(cnt[id].x - L, cnt[id].y, cnt[id].a, cnt[id].k));
+		draw_CNT(cnt[id].x - L, cnt[id].y, cnt[id].k, cnt[id].a);
+
+		if (y > L && !coincides(cnt[id].x - L, cnt[id].y - L)) //правый верхний угол
+		{
+			cntTrans.push_back(CNT(cnt[id].x - L, cnt[id].y - L, cnt[id].a, cnt[id].k));
+			draw_CNT(cnt[id].x - L, cnt[id].y - L, cnt[id].k, cnt[id].a);
+		}
+		if (y < 0 && !coincides(cnt[id].x - L, cnt[id].y + L)) //левый верхний угол
+		{
+			cntTrans.push_back(CNT(cnt[id].x - L, cnt[id].y + L, cnt[id].a, cnt[id].k));
+			draw_CNT(cnt[id].x - L, cnt[id].y + L, cnt[id].k, cnt[id].a);
+		}
 	}
 
-	if (!coincides(x_add - L, y_add, x_real, y_real) && check(x, y, L, -L / 3.0, k, a, 5.0 * L / 3.0, 90))
+	if (y < 0 && !coincides(cnt[id].x, cnt[id].y + L)) //низ
 	{
-		cnt_trans.push_back(CNT(x_add - L, y_add, a_add, k_add));
-		draw_CNT(x_add - L, y_add, k_add, a_add);
-		trans(x - L, y, k, a, x_add - L, y_add, k_add, a_add, flag + 1, x_real, y_real);
+		cntTrans.push_back(CNT(cnt[id].x, cnt[id].y + L, cnt[id].a, cnt[id].k));
+		draw_CNT(cnt[id].x, cnt[id].y + L, cnt[id].k, cnt[id].a);
 	}
-
-	if (!coincides(x_add + L, y_add, x_real, y_real) && check(x, y, 0, - L / 3.0, k, a, 5.0 * L / 3.0, 90))
+	if (y > L && !coincides(cnt[id].x, cnt[id].y - L)) //верх
 	{
-		cnt_trans.push_back(CNT(x_add + L, y_add, a_add, k_add));
-		draw_CNT(x_add + L, y_add, k_add, a_add);
-		trans(x + L, y, k, a, x_add + L, y_add, k_add, a_add, flag + 1, x_real, y_real);
+		cntTrans.push_back(CNT(cnt[id].x, cnt[id].y - L, cnt[id].a, cnt[id].k));
+		draw_CNT(cnt[id].x, cnt[id].y - L, cnt[id].k, cnt[id].a);
 	}
-	/*
-	HDC hDC = GetDC(GetConsoleWindow());
-	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(2, 255, 255));
-	SelectObject(hDC, Pen);
-
-
-	MoveToEx(hDC, -L / 3.0 + 10, L + 100, NULL);
-	LineTo(hDC, coord_x(-L / 3.0, 5.0 * L / 3.0, 0) + 10, coord_y(L, 5.0 * L / 3.0, 0) + 100);
-
-	MoveToEx(hDC, L + 10, -L / 3.0 + 100, NULL);
-	LineTo(hDC, coord_x( L, 5.0 * L / 3.0, M_PI/2.0) + 10, coord_y(-L / 3.0, 5.0 * L / 3.0, M_PI / 2.0) + 100);
-	*/
-
 }
 void packaging()
 {
@@ -388,26 +391,23 @@ void packaging()
 		{
 			cnt.push_back(CNT(x, y, a, k));
 			draw_CNT(x, y, k, a);
-			
-			double x1 = coord_x(x, radius, a + 90);
-			double y1 = coord_y(y, radius, a + 90);
+			int id = cnt.size() - 1;
+			cntInfo.push_back(CNTInfo(  coord_x(x, radius, a + 90), coord_y(y, radius, a + 90), /*(x1, y1)*/
+										coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), /*(x2, y2)*/
+										coord_x(coord_x(x, radius, a - 90), k, a), coord_y(coord_y(y, radius, a - 90), k, a), /*(x3, y3)*/
+										coord_x(coord_x(x, radius, a + 90), k, a), coord_y(coord_y(y, radius, a + 90), k, a), id));/*(x4, y4)*/
 
-			double x2 = coord_x(x, radius, a - 90);
-			double y2 = coord_y(y, radius, a - 90);
+			if (!belong(cntInfo[id].x1, cntInfo[id].y1)) trans(cntInfo[id].x1, cntInfo[id].y1, id);
+			if (!belong(cntInfo[id].x2, cntInfo[id].y2)) trans(cntInfo[id].x2, cntInfo[id].y2, id);
+			if (!belong(cntInfo[id].x3, cntInfo[id].y3)) trans(cntInfo[id].x3, cntInfo[id].y3, id);
+			if (!belong(cntInfo[id].x4, cntInfo[id].y4)) trans(cntInfo[id].x4, cntInfo[id].y4, id);
+			//{
 
-			double x3 = coord_x(x2, k, a);
-			double y3 = coord_y(y2, k, a);
-
-			double x4 = coord_x(x1, k, a);
-			double y4 = coord_y(y1, k, a);
-			 
-			if (!belong(x1, y1) || !belong(x2, y2) || !belong(x3, y3) || !belong(x4, y4))
-			{
-				trans(x1, y1, radius*2, a - 90, x, y, k, a,0, x, y);
-				trans(x1, y1, k, a, x, y, k, a,0, x, y);
-				trans(x4, y4, radius*2, a - 90, x, y, k, a,0, x, y);
-				trans(x2, y2, k, a, x, y, k, a,0, x, y);
-			}
+				/*trans(cntInfo[id].x1, cntInfo[id].y1, radius*2, a - 90, x, y, k, a,0, x, y);
+				trans(cntInfo[id].x1, cntInfo[id].y1, k, a, x, y, k, a,0, x, y);
+				trans(cntInfo[id].x4, cntInfo[id].y4, radius*2, a - 90, x, y, k, a,0, x, y);
+				trans(cntInfo[id].x2, cntInfo[id].y2, k, a, x, y, k, a,0, x, y);*/
+			//}
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
 			S += k * radius * 2.0;
 		}
@@ -441,16 +441,11 @@ void main()
 	packaging();
 	double finish = clock();
 	cout << "meow! " << endl;
-	for (int i = 0; i < cnt_trans.size(); i++)
+	for (int i = 0; i < cntTrans.size(); i++)
 	{
-		dd << cnt_trans[i].x << endl;
+		dd << cntTrans[i].x << "  " << cntTrans[i].y << endl;
 	}
-	dd << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl;
-
-	for (int i = 0; i < cnt_trans.size(); i++)
-	{
-		dd << cnt_trans[i].y << endl;
-	}
+	
 	file.close();
 	raspr.close();
 	cout << "Упаковано " << cnt.size() << " за " << (finish-start)/CLOCKS_PER_SEC << "c." << endl;
