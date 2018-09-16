@@ -11,10 +11,10 @@ CNTInfo::CNTInfo()
 	y3 = 0;
 	x4 = 0;
 	y4 = 0;
-	id = 0;
+
 }
 
-CNTInfo::CNTInfo(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, double _x4, double _y4, int _id)
+CNTInfo::CNTInfo(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, double _x4, double _y4)
 {
 	x1 = _x1;
 	y1 = _y1;
@@ -24,7 +24,7 @@ CNTInfo::CNTInfo(double _x1, double _y1, double _x2, double _y2, double _x3, dou
 	y3 = _y3;
 	x4 = _x4;
 	y4 = _y4;
-	id = _id;
+
 }
 
 void CNTInfo::top(double &a, double &b, double &c)
