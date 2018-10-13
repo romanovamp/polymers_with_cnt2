@@ -10,6 +10,8 @@
 #include "Header.h"
 #include "CNT.h"
 #include "CNTInfo.h"
+#include "Interval.h"
+
 #include <ctime>
 
 using namespace std;
@@ -27,6 +29,7 @@ bool flag;
 MtRng64 mt;
 bool ready = false;
 double second = 0.0;
+Interval *intervals;
 #define M_PI 3.14159265358979323846
 
 //************************************************************************
@@ -279,7 +282,6 @@ bool coincides(double x, double y) //true - трубка с такими координатами уже доб
 		if (cntTrans[cntTrans.size() - i].x == x && cntTrans[cntTrans.size() - i].y == y) return true;
 	return false;
 }
-
 void addInfoCNT(double x, double y, int a, double k)
 {
 	cntTransInfo.push_back(CNTInfo( coord_x(x, radius, a + 90), coord_y(y, radius, a + 90), /*(x1, y1)*/
@@ -395,8 +397,55 @@ void packaging()
 }
 int numIntervals()
 {
-	int m = pow(2.0 * cnt.size() / 3.0, 1.0 / 6.0);
-	return pow(m + 1, 2);
+	return pow(2.0 * cnt.size() / 3.0, 1.0 / 3.0);
+}
+
+void equability()
+{
+	int num = numIntervals();
+	intervals = new Interval[num];
+	for (int i = 0; i < num; i++)
+	{
+		intervals[i].x1 = i *L / num;
+		intervals[i].x2 = (i + 1)*L / num;
+		intervals[i].summ = 0;
+
+		HDC hDC = GetDC(GetConsoleWindow());
+		HPEN Pen = CreatePen(PS_SOLID, 2, RGB(0, 255, 255));
+		SelectObject(hDC, Pen);
+
+		MoveToEx(hDC, 50+intervals[i].x1, 130, NULL); // |
+		LineTo(hDC, 50 + intervals[i].x1, 130 + L);
+	}
+	int **point = new int*[2]; //в каком интервале лежит точка
+	for (int i = 0; i < 2; i++)
+		point[i] = new int[4];
+
+	for (int j = 0; j < cnt.size(); j++)
+	{
+
+		for (int i = 0; i < num; i++)
+		{
+			if (cntInfo[j].x1 >= intervals[i].x1 && cntInfo[j].x1 <= intervals[i].x2) { point[0][0] = i; point[1][0] = cntInfo[j].x1; }
+			if (cntInfo[j].x2 >= intervals[i].x1 && cntInfo[j].x2 <= intervals[i].x2) { point[0][1] = i; point[1][1] = cntInfo[j].x2; }
+			if (cntInfo[j].x3 >= intervals[i].x1 && cntInfo[j].x3 <= intervals[i].x2) { point[0][2] = i; point[1][2] = cntInfo[j].x3; }
+			if (cntInfo[j].x4 >= intervals[i].x1 && cntInfo[j].x4 <= intervals[i].x2) { point[0][3] = i; point[1][3] = cntInfo[j].x4; }
+		}
+		//1. унт внутри интервала
+		if (point[0] == point[1] && point[1] == point[2] && point[2] == point[3])
+		{
+			intervals[point[0][0]].summ = intervals[point[0][0]].summ + cnt[j].k*radius*2.0;
+			continue;
+		}
+		//2. если в разных интервалах 
+		
+
+		
+		// 2.2 если в трех интервалах
+
+
+	}
+	delete[]point;
 }
 
 void main()
@@ -428,6 +477,7 @@ void main()
 
 	double start = clock();
 	packaging();
+
 	double finish = clock();
 	cout << "meow! " << endl;
 	/*for (int i = 0; i < cntTrans.size(); i++)
@@ -439,7 +489,12 @@ void main()
 	raspr.close();
 	dd.close();
 	cout << "Упаковано " << cnt.size() << " за " << (finish-start)/CLOCKS_PER_SEC << "c." << endl;
-	//cout << numIntervals() << endl;
+	equability();
+	for (int j = 0; j < numIntervals(); j++)
+	{
+		cout << intervals[j].summ << endl;
+	}
+	delete[]intervals;
 	cin >> p; 
 }
 
