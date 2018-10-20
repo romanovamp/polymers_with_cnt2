@@ -31,6 +31,8 @@ bool ready = false;
 double second = 0.0;
 Interval *intervals;
 #define M_PI 3.14159265358979323846
+int changeX = 300, changeY=50;
+
 
 //************************************************************************
 int GraphInConsole()
@@ -38,17 +40,17 @@ int GraphInConsole()
 	HDC hDC = GetDC(GetConsoleWindow());
 	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
 	SelectObject(hDC, Pen);
-	MoveToEx(hDC, 50, 130, NULL); // -
-	LineTo(hDC, 50 + L, 130);
+	MoveToEx(hDC, changeX, changeY, NULL); // -
+	LineTo(hDC, changeX + L, changeY);
 
-	MoveToEx(hDC, 50, 130 + L, NULL); // -
-	LineTo(hDC, 50 + L, 130 + L);
+	MoveToEx(hDC, changeX, changeY + L, NULL); // -
+	LineTo(hDC, changeX + L, changeY + L);
 
-	MoveToEx(hDC, 50 + L, 130, NULL); // |
-	LineTo(hDC, 50 + L, 130 + L);
+	MoveToEx(hDC, changeX + L, changeY, NULL); // |
+	LineTo(hDC, changeX + L, changeY + L);
 
-	MoveToEx(hDC, 50, 130, NULL); // |
-	LineTo(hDC, 50, 130 + L);
+	MoveToEx(hDC, changeX, changeY, NULL); // |
+	LineTo(hDC, changeX, changeY + L);
 
 	return 0;
 }
@@ -78,17 +80,17 @@ void drawCNT(vector <CNTInfo> loc, int id)
 	HPEN Pen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
 	SelectObject(hDC, Pen);
 
-	MoveToEx(hDC, loc[id].x1 + 50, loc[id].y1 + 130, NULL);
-	LineTo(hDC, loc[id].x4 + 50, loc[id].y4 + 130);
+	MoveToEx(hDC, loc[id].x1 + changeX, loc[id].y1 + changeY, NULL);
+	LineTo(hDC, loc[id].x4 + changeX, loc[id].y4 + changeY);
 
-	MoveToEx(hDC, loc[id].x2 + 50, loc[id].y2 + 130, NULL);
-	LineTo(hDC, loc[id].x3 + 50, loc[id].y3 + 130);
+	MoveToEx(hDC, loc[id].x2 + changeX, loc[id].y2 + changeY, NULL);
+	LineTo(hDC, loc[id].x3 + changeX, loc[id].y3 + changeY);
 
-	MoveToEx(hDC, loc[id].x1 + 50, loc[id].y1 + 130, NULL);
-	LineTo(hDC, loc[id].x2 + 50, loc[id].y2 + 130);
+	MoveToEx(hDC, loc[id].x1 + changeX, loc[id].y1 + changeY, NULL);
+	LineTo(hDC, loc[id].x2 + changeX, loc[id].y2 + changeY);
 
-	MoveToEx(hDC, loc[id].x4 + 50, loc[id].y4 + 130, NULL);
-	LineTo(hDC, loc[id].x3 + 50, loc[id].y3 + 130);
+	MoveToEx(hDC, loc[id].x4 + changeX, loc[id].y4 + changeY, NULL);
+	LineTo(hDC, loc[id].x3 + changeX, loc[id].y3 + changeY);
 
 }
 double d(double x1, double y1, double x2, double y2)
@@ -296,19 +298,19 @@ void trans(double x, double y, int id) //добавление трубки в cntTrans
 	{
 		cntTrans.push_back(CNT(cnt[id].x + L, cnt[id].y, cnt[id].a, cnt[id].k));
 		addInfoCNT(cnt[id].x + L, cnt[id].y, cnt[id].a, cnt[id].k);
-		drawCNT(cntTransInfo, cntTransInfo.size()-1);
+		//drawCNT(cntTransInfo, cntTransInfo.size()-1);
 
 		if (y < 0 && !coincides(cnt[id].x + L, cnt[id].y + L)) //левый нижний угол
 		{
 			cntTrans.push_back(CNT(cnt[id].x + L, cnt[id].y + L, cnt[id].a, cnt[id].k));
 			addInfoCNT(cnt[id].x + L, cnt[id].y + L, cnt[id].a, cnt[id].k);
-			drawCNT(cntTransInfo, cntTransInfo.size() - 1);
+			//drawCNT(cntTransInfo, cntTransInfo.size() - 1);
 		}
 		if (y > L && !coincides(cnt[id].x + L, cnt[id].y - L)) //правый нижний угол
 		{
 			cntTrans.push_back(CNT(cnt[id].x + L, cnt[id].y - L, cnt[id].a, cnt[id].k));
 			addInfoCNT(cnt[id].x + L, cnt[id].y - L, cnt[id].a, cnt[id].k);
-			drawCNT(cntTransInfo, cntTransInfo.size() - 1);
+			//drawCNT(cntTransInfo, cntTransInfo.size() - 1);
 		}
 	}
 
@@ -316,19 +318,19 @@ void trans(double x, double y, int id) //добавление трубки в cntTrans
 	{
 		cntTrans.push_back(CNT(cnt[id].x - L, cnt[id].y, cnt[id].a, cnt[id].k));
 		addInfoCNT(cnt[id].x - L, cnt[id].y, cnt[id].a, cnt[id].k);
-		drawCNT(cntTransInfo, cntTransInfo.size() - 1);
+		//drawCNT(cntTransInfo, cntTransInfo.size() - 1);
 
 		if (y > L && !coincides(cnt[id].x - L, cnt[id].y - L)) //правый верхний угол
 		{
 			cntTrans.push_back(CNT(cnt[id].x - L, cnt[id].y - L, cnt[id].a, cnt[id].k));
 			addInfoCNT(cnt[id].x - L, cnt[id].y - L, cnt[id].a, cnt[id].k);
-			drawCNT(cntTransInfo, cntTransInfo.size() - 1);
+			//drawCNT(cntTransInfo, cntTransInfo.size() - 1);
 		}
 		if (y < 0 && !coincides(cnt[id].x - L, cnt[id].y + L)) //левый верхний угол
 		{
 			cntTrans.push_back(CNT(cnt[id].x - L, cnt[id].y + L, cnt[id].a, cnt[id].k));
 			addInfoCNT(cnt[id].x - L, cnt[id].y + L, cnt[id].a, cnt[id].k);
-			drawCNT(cntTransInfo, cntTransInfo.size() - 1);
+			//drawCNT(cntTransInfo, cntTransInfo.size() - 1);
 		}
 	}
 
@@ -336,13 +338,13 @@ void trans(double x, double y, int id) //добавление трубки в cntTrans
 	{
 		cntTrans.push_back(CNT(cnt[id].x, cnt[id].y + L, cnt[id].a, cnt[id].k));
 		addInfoCNT(cnt[id].x, cnt[id].y + L, cnt[id].a, cnt[id].k);
-		drawCNT(cntTransInfo, cntTransInfo.size() - 1);
+		//drawCNT(cntTransInfo, cntTransInfo.size() - 1);
 	}
 	if (y > L && !coincides(cnt[id].x, cnt[id].y - L)) //верх
 	{
 		cntTrans.push_back(CNT(cnt[id].x, cnt[id].y - L, cnt[id].a, cnt[id].k));
 		addInfoCNT(cnt[id].x, cnt[id].y - L, cnt[id].a, cnt[id].k);
-		drawCNT(cntTransInfo, cntTransInfo.size() - 1);
+		//drawCNT(cntTransInfo, cntTransInfo.size() - 1);
 	}
 }
 void packaging()
@@ -400,49 +402,166 @@ int numIntervals()
 	return pow(2.0 * cnt.size() / 3.0, 1.0 / 3.0);
 }
 
+void sort(double** A, int n, int m)
+{
+	double* t = NULL;
+	for (int i=0; i < n; i++)
+		for (int j = i + 1; j < n; j++)
+			if (A[i][0] >= A[j][0])
+			{
+				t = A[i];
+				A[i] = A[j];
+				A[j] = t;
+			}
+}
+
+void cut(int j, double &x1, double &y1, double &x2, double &y2, double A1, double B1, double C1)
+{
+	double A2, B2, C2;
+	bool dot1 = false;
+	double x, y;
+
+	cntInfo[j].left(A2, B2, C2);
+	intersect(A1, A2, B1, B2, C1, C2, x, y);
+	if (cntInfo[j].y1 <= y && y <= cntInfo[j].y4 || cntInfo[j].y4 <= y && y <= cntInfo[j].y1) //точка подходит
+	{
+		x1 = x;
+		y1 = y;
+		dot1 = true; //первая точка есть
+	}
+
+	cntInfo[j].bottom(A2, B2, C2);
+	intersect(A1, A2, B1, B2, C1, C2, x, y);
+	if (cntInfo[j].y1 <= y && y <= cntInfo[j].y2 || cntInfo[j].y2 <= y && y <= cntInfo[j].y1) //точка подходит
+		if (!dot1)
+		{
+			x1 = x;
+			y1 = y;
+			dot1 = true; //первая точка есть
+		}
+		else 
+		{
+			x2 = x;
+			y2 = y;
+			return;
+		}
+
+	cntInfo[j].right(A2, B2, C2);
+	intersect(A1, A2, B1, B2, C1, C2, x, y);
+	if (cntInfo[j].y2 <= y && y <= cntInfo[j].y3 || cntInfo[j].y3 <= y && y <= cntInfo[j].y2) //точка подходит
+		if (!dot1)
+		{
+			x1 = x;
+			y1 = y;
+			dot1 = true; //первая точка есть
+		}
+		else
+		{
+			x2 = x;
+			y2 = y;
+			return;
+		}
+
+	cntInfo[j].top(A2, B2, C2);
+	intersect(A1, A2, B1, B2, C1, C2, x, y);
+	if (cntInfo[j].y3 <= y && y <= cntInfo[j].y4 || cntInfo[j].y4 <= y && y <= cntInfo[j].y3) //точка подходит
+		if (!dot1)
+		{
+			x1 = x;
+			y1 = y;
+			dot1 = true; //первая точка есть
+		}
+		else
+		{
+			x2 = x;
+			y2 = y;
+			return;
+		}
+}
+
 void equability()
 {
-	int num = numIntervals();
+	int num = 2 + numIntervals();
 	intervals = new Interval[num];
 	for (int i = 0; i < num; i++)
 	{
-		intervals[i].x1 = i *L / num;
-		intervals[i].x2 = (i + 1)*L / num;
+		intervals[i].x1 = (i-1) *L / numIntervals();
+		intervals[i].x2 = i*L / numIntervals();
 		intervals[i].summ = 0;
 
 		HDC hDC = GetDC(GetConsoleWindow());
 		HPEN Pen = CreatePen(PS_SOLID, 2, RGB(0, 255, 255));
 		SelectObject(hDC, Pen);
 
-		MoveToEx(hDC, 50+intervals[i].x1, 130, NULL); // |
-		LineTo(hDC, 50 + intervals[i].x1, 130 + L);
+		MoveToEx(hDC, changeX +intervals[i].x1, changeY, NULL); // |
+		LineTo(hDC, changeX + intervals[i].x1, changeY + L);
+
+		Pen = CreatePen(PS_SOLID, 2, RGB(0, 0, 210));
+		SelectObject(hDC, Pen);
+
+		MoveToEx(hDC, changeX + intervals[i].x2, changeY, NULL); // |
+		LineTo(hDC, changeX + intervals[i].x2, changeY + L);
 	}
-	int **point = new int*[2]; //в каком интервале лежит точка
-	for (int i = 0; i < 2; i++)
-		point[i] = new int[4];
+	int pn = 4, pm = 3;
+	double **point = new double*[pn]; //в каком интервале лежит точка
+	for (int i = 0; i < pn; i++)
+		point[i] = new double[pm];
 
 	for (int j = 0; j < cnt.size(); j++)
 	{
 
 		for (int i = 0; i < num; i++)
 		{
-			if (cntInfo[j].x1 >= intervals[i].x1 && cntInfo[j].x1 <= intervals[i].x2) { point[0][0] = i; point[1][0] = cntInfo[j].x1; }
-			if (cntInfo[j].x2 >= intervals[i].x1 && cntInfo[j].x2 <= intervals[i].x2) { point[0][1] = i; point[1][1] = cntInfo[j].x2; }
-			if (cntInfo[j].x3 >= intervals[i].x1 && cntInfo[j].x3 <= intervals[i].x2) { point[0][2] = i; point[1][2] = cntInfo[j].x3; }
-			if (cntInfo[j].x4 >= intervals[i].x1 && cntInfo[j].x4 <= intervals[i].x2) { point[0][3] = i; point[1][3] = cntInfo[j].x4; }
+			if ( intervals[i].x1 <= cntInfo[j].x1  && cntInfo[j].x1 <= intervals[i].x2) { point[0][0] = i; point[0][1] = cntInfo[j].x1; point[0][2] = cntInfo[j].y1; }
+			if ( intervals[i].x1 <= cntInfo[j].x2  && cntInfo[j].x2 <= intervals[i].x2) { point[1][0] = i; point[1][1] = cntInfo[j].x2; point[1][2] = cntInfo[j].y2; }
+			if ( intervals[i].x1 <= cntInfo[j].x3  && cntInfo[j].x3 <= intervals[i].x2) { point[2][0] = i; point[2][1] = cntInfo[j].x3; point[2][2] = cntInfo[j].y3; }
+			if ( intervals[i].x1 <= cntInfo[j].x4  && cntInfo[j].x4 <= intervals[i].x2) { point[3][0] = i; point[3][1] = cntInfo[j].x4; point[3][2] = cntInfo[j].y4; }
 		}
 		//1. унт внутри интервала
-		if (point[0] == point[1] && point[1] == point[2] && point[2] == point[3])
+		if (point[0][0] == point[1][0] && point[1][0] == point[2][0] && point[2][0] == point[3][0])
 		{
-			intervals[point[0][0]].summ = intervals[point[0][0]].summ + cnt[j].k*radius*2.0;
+			intervals[(int)point[0][0]].summ = intervals[(int)point[0][0]].summ + cnt[j].k*radius*2.0;
 			continue;
 		}
 		//2. если в разных интервалах 
+
+		//сотировка по первой строке 
+		sort(point, pn, pm);
 		
 
-		
-		// 2.2 если в трех интервалах
+		double A = 1, B = 0, C = -intervals[(int)point[0][0]].x2;
+		double x1, y1, x2, y2;
+		cut(j, x1, y1, x2, y2, A, B, C); // координаты точек пересечения с границей интервала
+		double s = 0;
 
+		//2.1 случай 1222 треугольник-многоугольник
+		if (point[0][0] != point[1][0] && point[1][0] == point[2][0] && point[2][0] == point[3][0])
+		{
+			double h = abs(A*point[0][1] + B*point[0][2] + C) / sqrt(A*A+B*B); //высота треугольника
+			s = d(x1, y1, x2, y2)*h/2.0; //площадь треугольника
+			//cout << "ТЛ   " << s << "     " << cnt[j].k * 2.0 * radius - s << "     " << cnt[j].k * 2.0 * radius << endl;
+		}
+		//2.2 случай 1122 трапеция-трапеция
+		if (point[0][0] == point[1][0] && point[1][0] != point[2][0] && point[2][0] == point[3][0])
+		{
+			s = d((point[0][1] + point[1][1]) / 2.0, (point[0][2] + point[1][2]) / 2.0, (x1 + x2) / 2.0, (y1 + y2) / 2.0) * radius * 2.0; //площадь треугольника
+			//cout << "ПП   " << s << "     " << cnt[j].k * 2.0 * radius - s << "     " << cnt[j].k * 2.0 * radius << endl;
+		}
+		//2.3 случай 1112 трапеция-многоугольник
+		if (point[0][0] == point[1][0] && point[1][0] == point[2][0] && point[2][0] != point[3][0])
+		{
+			double h = abs(A*point[3][1] + B * point[3][2] + C) / sqrt(A * A + B * B); //высота треугольника справа
+			s = (cnt[j].k * 2 * radius) - d(x1, y1, x2, y2)*h / 2.0; //площадь треугольника	
+			//cout << "ТП   " << s << "     " << cnt[j].k * 2.0 * radius - s << "     " << cnt[j].k * 2.0 * radius << endl;
+		}
+		intervals[(int)point[0][0]].summ = intervals[(int)point[0][0]].summ + s; //площадь треугольника в левый интервал
+		intervals[((int)point[0][0] + 1)].summ = intervals[((int)point[0][0] + 1)].summ + (cnt[j].k * 2 * radius - s);//площадь оставшейся фигуры в правый инервал
+
+		//3 унт лежит более чем в двух интервалах
+		if (point[0][0] != point[3][0])
+		{
+
+		}
 
 	}
 	delete[]point;
@@ -490,12 +609,21 @@ void main()
 	dd.close();
 	cout << "Упаковано " << cnt.size() << " за " << (finish-start)/CLOCKS_PER_SEC << "c." << endl;
 	equability();
-	for (int j = 0; j < numIntervals(); j++)
+	double summ1 = 0;
+	for (int j = 0; j < 2 + numIntervals(); j++)
 	{
-		cout << intervals[j].summ << endl;
+		summ1 = summ1 + intervals[j].summ;
+		cout << intervals[j].x1 << "//" << intervals[j].x2 << "//" << intervals[j].summ << endl;
 	}
+
+	double summ2 = 0;
+	for (int i = 0; i < cnt.size(); i++)
+		summ2 = summ2 + cnt[i].k*2.0*radius;
+	cout << summ1 << " = " << summ2 << endl;
 	delete[]intervals;
 	cin >> p; 
+
+
 }
 
 
