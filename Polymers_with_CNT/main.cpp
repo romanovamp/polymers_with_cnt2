@@ -21,21 +21,24 @@ int L, N, n;
 double mean, devi, radius;
 double p;
 
+int colour1=0, colour2=0, colour3=0;
 vector <CNT> cnt(0);
 vector <CNT> cntTrans(0);
 vector <CNTInfo> cntInfo(0);
 vector <CNTInfo> cntTransInfo(0);
 ofstream file, raspr, dd, aa;
-bool flag;
+bool flag, fla=false;
 bool *transFlag;
 MtRng64 mt;
 bool ready = false, firstTest;
 double second = 0.0;
-Interval *intervals;
 #define M_PI 3.14159265358979323846
-int changeX = 300, changeY=50;
-
-
+int changeX = 350, changeY=50;
+vector <vector<CNTInfo>> clustersInfo(0);
+int kolClus = 0;
+double mCh = 0;
+vector <CNTInfo> allCnt(0);
+CNTInfo cI;
 //************************************************************************
 int GraphInConsole()
 {
@@ -75,15 +78,12 @@ double coordY(double y, double k, int a)
 	return y + k * sin((a*M_PI) / 180.0);
 }
 
-void drawCNT(CNTInfo loc, bool red)
+void drawCNT(CNTInfo loc, int i, int j,int k)
 {
 	
 	HDC hDC = GetDC(GetConsoleWindow());
 	HPEN Pen;
-	if(red)
-		Pen = CreatePen(PS_SOLID, 2, RGB(255, 0, 0));
-	else 
-		Pen = CreatePen(PS_SOLID, 2, RGB(255, 255, 255));
+	Pen = CreatePen(PS_SOLID, 2, RGB(i, j, k));
 	SelectObject(hDC, Pen);
 
 	MoveToEx(hDC, loc.x1 + changeX, loc.y1 + changeY, NULL);
@@ -112,30 +112,7 @@ double D(double x1, double y1, double x2, double y2, double x, double y)
 {
 	return (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
 }
-bool minDistance(CNTInfo cI, double x, double y) //true - допустимое расстояние
-{
-	//double c_c = 0.154;
-	double c_c = 2;
 
-	if ((cI.lA()*x + cI.lB()*y + cI.lC())*(cI.rA()*x + cI.rB()*y + cI.rC()) >= 0)
-	{
-		if (dTP(x, y, cI.bA(), cI.bB(), cI.bC()) < radius * c_c) return false;
-		if (dTP(x, y, cI.tA(), cI.tB(), cI.tC()) < radius * c_c) return false;
-	}
-	if ((cI.bA()*x + cI.bB()*y + cI.bC())*(cI.tA()*x + cI.tB()*y + cI.tC()) >= 0) 
-	{
-		if (dTP(x, y, cI.rA(), cI.rB(), cI.rC()) < radius * c_c) return false;
-		if (dTP(x, y, cI.lA(), cI.lB(), cI.lC()) < radius * c_c) return false;
-
-		
-	}
-	if (d(x, y, cI.x1, cI.y1) < radius * c_c) return false;
-	if (d(x, y, cI.x2, cI.y2) < radius * c_c) return false;
-	if (d(x, y, cI.x3, cI.y3) < radius * c_c) return false;
-	if (d(x, y, cI.x4, cI.y4) < radius * c_c) return false;
-
-	return true;
-}
 
 void equation(double x1, double y1, double x2, double y2, double &a, double &b, double &c) // уравнение прямой 
 {
@@ -177,43 +154,46 @@ bool check(double x1, double y1, double x2, double y2, double k1, double al1, do
 	}
 	return false;
 }
+bool vzaim(CNTInfo cntNew, CNTInfo locInfo, double sv) //true - не пересекаются
+{
+	
+	cI = CNTInfo(coordX(locInfo.x, sv, locInfo.a - 180), coordY(locInfo.y, sv, locInfo.a - 180), locInfo.k + 2 * sv, locInfo.a, radius + sv);
 
+	//if(fla)drawCNT(cI,220,220,220);
+	if (belong(cntNew.x1, cntNew.y1, cI)) return false;
+	if (belong(cntNew.x2, cntNew.y2, cI)) return false;
+	if (belong(cntNew.x3, cntNew.y3, cI)) return false;
+	if (belong(cntNew.x4, cntNew.y4, cI)) return false;
+	return true;
+}
+
+bool vzaim(CNTInfo cntNew, CNTInfo locInfo) //true - подходит
+{
+	//if(fla)drawCNT(cI,220,220,220); 
+	if (belong(cntNew.x1, cntNew.y1, locInfo)) return false;
+	if (belong(cntNew.x2, cntNew.y2, locInfo)) return false;
+	if (belong(cntNew.x3, cntNew.y3, locInfo)) return false;
+	if (belong(cntNew.x4, cntNew.y4, locInfo)) return false;
+	return true;
+}
 bool allTest(CNTInfo cntNew, vector<CNT>loc, vector <CNTInfo> locInfo) //true - удачное расположение
 {
 	for (int i = 0; i < loc.size(); i++)
 	{
 		if ((sqrt(pow(cntNew.k, 2) + pow(radius, 2)) + sqrt(pow(loc[i].k, 2) + pow(radius, 2))) < d(cntNew.x, cntNew.y, loc[i].x, loc[i].y)) continue;
 
-		double c_c = 0.154*radius;
+		//double c_c = 0.154*radius;
 		
 		//if (check(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), locInfo[i].x1, locInfo[i].y1, k, a, loc[i].k, loc[i].a)) return false; /*right-left*/
 		//if (check(coord_x(x, radius, a - 90), coord_y(y, radius, a - 90), locInfo[i].x2, locInfo[i].y2, k, a, loc[i].k, loc[i].a)) return false; /*right-right*/
 		
 		/*от точки до прямой*/
 		
-		double x=0, y=0;
+		if (!vzaim(cntNew, locInfo[i])) return false;
 
-		x = coordX(locInfo[i].x, c_c, locInfo[i].a - 180);
-		y = coordY(locInfo[i].y, c_c, locInfo[i].a - 180);
-
-		CNTInfo cI = CNTInfo(x,y, locInfo[i].k + 2 * c_c, locInfo[i].a, radius + c_c);
-
-		if (belong(cntNew.x1, cntNew.y1, cI)) return false;
-		if (belong(cntNew.x2, cntNew.y2, cI)) return false;
-		if (belong(cntNew.x3, cntNew.y3, cI)) return false;
-		if (belong(cntNew.x4, cntNew.y4, cI)) return false;
+		if (!vzaim(locInfo[i], cntNew)) return false;
 		
-		x = coordX(cntNew.x, c_c, cntNew.a - 180);
-		y = coordY(cntNew.y, c_c, cntNew.a - 180);
-
-		cI = CNTInfo(x, y, cntNew.k + 2 * c_c, cntNew.a, radius + c_c);
-
-		if (belong(locInfo[i].x1, locInfo[i].y1, cI)) return false;
-		if (belong(locInfo[i].x2, locInfo[i].y2, cI)) return false;
-		if (belong(locInfo[i].x3, locInfo[i].y3, cI)) return false;
-		if (belong(locInfo[i].x4, locInfo[i].y4, cI)) return false;
-		
-		//if (check(cntNew.x1, cntNew.y1, locInfo[i].x1, locInfo[i].y1, cntNew.k, cntNew.a, loc[i].k, loc[i].a)) return false;/*left-left*/
+		if (check(cntNew.x1, cntNew.y1, locInfo[i].x1, locInfo[i].y1, cntNew.k, cntNew.a, loc[i].k, loc[i].a)) return false;/*left-left*/
 		if (check(cntNew.x1, cntNew.y1, locInfo[i].x2, locInfo[i].y2, cntNew.k, cntNew.a, loc[i].k, loc[i].a)) return false; /*left-right*/
 
 	}
@@ -222,7 +202,7 @@ bool allTest(CNTInfo cntNew, vector<CNT>loc, vector <CNTInfo> locInfo) //true - 
 bool test(double x, double y, double k, int a) //true - удачное расположение
 {
 	CNTInfo cIM = CNTInfo(x, y, k, a, radius);
-	CNTInfo cI;
+
 	if (!allTest(cIM, cnt, cntInfo) || !allTest(cIM, cntTrans, cntTransInfo)) return false;
 
 	if (cIM.x1 < 0 || cIM.x2 < 0 || cIM.x3 < 0 || cIM.x4 < 0)
@@ -249,8 +229,6 @@ bool test(double x, double y, double k, int a) //true - удачное расположение
 		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
 		transFlag[3] = true;
 	}
-
-
 
 	if (cIM.x1 < 0 && cIM.y1 < 0 || cIM.x2 < 0 && cIM.y2 < 0 || cIM.x3 < 0 && cIM.y3 < 0 || cIM.x4 < 0 && cIM.y4 < 0)
 	{
@@ -322,16 +300,17 @@ void addTransCNT(double x, double y, int a, double k)
 {
 	cntTrans.push_back(CNT(x, y, a, k));
 	cntTransInfo.push_back(CNTInfo(x, y, k, a, radius));
-	if (firstTest)drawCNT(cntTransInfo[(cntTransInfo.size() - 1)], true);
+	if (firstTest)drawCNT(cntTransInfo[(cntTransInfo.size() - 1)], 225,0,0);
 }
 void packaging()
 {
 	double x, y, k;
 	int a, kol = 0;
 	double S = 0;
-
+	int fdf = 0;
 	for(int i=0; i<n; i++)
 	{
+		if (i % 1000 == 0) cout << i << endl;
 		flag = false;
 		kol = 0;
 		k = bm();
@@ -350,7 +329,7 @@ void packaging()
 			}
 			else
 			{
-				//cout << "Реальная плотность: "<< S / (L*L) << endl;
+				cout << " -n " << endl;
 				//?????
 				n = n - 1;
 				break;
@@ -363,7 +342,7 @@ void packaging()
 			cnt.push_back(CNT(x, y, a, k));
 			cntInfo.push_back(CNTInfo(x, y, k, a, radius));
 
-			if(firstTest)drawCNT(cntInfo[(cntInfo.size()-1)], false);
+			if(firstTest)drawCNT(cntInfo[(cntInfo.size()-1)], 225,225,225);
 
 			if (transFlag[0]) addTransCNT(x + L, y, a, k);
 			if (transFlag[1]) addTransCNT(x - L, y, a, k);
@@ -388,7 +367,7 @@ int numIntervals()
 	return pow(2.0 * n / 3.0, 1.0 / 3.0);
 }
 
-void sort(double** A, int n, int m)
+void sortA(double** A, int n, int m)
 {
 	double* t = NULL;
 	for (int i=0; i < n; i++)
@@ -401,178 +380,197 @@ void sort(double** A, int n, int m)
 			}
 }
 
-void cut(int j, double &x1, double &y1, double &x2, double &y2, double A1, double B1, double C1)
+vector<CNTInfo> sortV(vector<CNTInfo> A)
 {
-	double A2, B2, C2;
-	bool dot1 = false;
-	double x, y;
 
-	cntInfo[j].left(A2, B2, C2);
-	intersect(A1, A2, B1, B2, C1, C2, x, y);
-	if (cntInfo[j].y1 <= y && y <= cntInfo[j].y4 || cntInfo[j].y4 <= y && y <= cntInfo[j].y1) //точка подходит
+	for (int i = 0; i < A.size(); i++)
 	{
-		x1 = x;
-		y1 = y;
-		dot1 = true; //первая точка есть
+		for (int j = i + 1; j < A.size(); j++)
+			if (A[i].x >= A[j].x)
+			{
+				cI = A[i];
+				A[i] = A[j];
+				A[j] = cI;
+			}
+		A[i].clus = false;
 	}
-
-	cntInfo[j].bottom(A2, B2, C2);
-	intersect(A1, A2, B1, B2, C1, C2, x, y);
-	if (cntInfo[j].y1 <= y && y <= cntInfo[j].y2 || cntInfo[j].y2 <= y && y <= cntInfo[j].y1) //точка подходит
-		if (!dot1)
-		{
-			x1 = x;
-			y1 = y;
-			dot1 = true; //первая точка есть
-		}
-		else 
-		{
-			x2 = x;
-			y2 = y;
-			return;
-		}
-
-	cntInfo[j].right(A2, B2, C2);
-	intersect(A1, A2, B1, B2, C1, C2, x, y);
-	if (cntInfo[j].y2 <= y && y <= cntInfo[j].y3 || cntInfo[j].y3 <= y && y <= cntInfo[j].y2) //точка подходит
-		if (!dot1)
-		{
-			x1 = x;
-			y1 = y;
-			dot1 = true; //первая точка есть
-		}
-		else
-		{
-			x2 = x;
-			y2 = y;
-			return;
-		}
-
-	cntInfo[j].top(A2, B2, C2);
-	intersect(A1, A2, B1, B2, C1, C2, x, y);
-	if (cntInfo[j].y3 <= y && y <= cntInfo[j].y4 || cntInfo[j].y4 <= y && y <= cntInfo[j].y3) //точка подходит
-		if (!dot1)
-		{
-			x1 = x;
-			y1 = y;
-			dot1 = true; //первая точка есть
-		}
-		else
-		{
-			x2 = x;
-			y2 = y;
-			return;
-		}
+	return A;
 }
-void equability()
+
+vector<CNTInfo> sortV2(vector<CNTInfo> A)
 {
-	int num = 2 + numIntervals();
-	intervals = new Interval[num];
-	for (int i = 0; i < num; i++)
+	
+	for (int i = 0; i < A.size(); i++)
 	{
-		intervals[i].x1 = (i-1) *L / numIntervals();
-		intervals[i].x2 = i*L / numIntervals();
-		intervals[i].summ = 0;
+		for (int j = i + 1; j < A.size(); j++)
+			if (A[i].y >= A[j].y)
+			{
+				cI = A[i];
+				A[i] = A[j];
+				A[j] = cI;
+			}
+		A[i].clus = false;
+	}
+	return A;
+}
+
+void cluster(int i, int numClusters)
+{
+	
+	for(;i < allCnt.size();i++)
+	{
+		//переделать условие, сделать условие Если растояние <= с_с, то точно кластер
+		//пока что делаем так, что если <= mCh то тоже кластер 
+		for (int j = 0; j < clustersInfo[numClusters].size(); j++)
+		{
+			if(!allCnt[i].clus)
+				if (!vzaim(allCnt[i], clustersInfo[numClusters][j], mCh) ||
+					!vzaim(clustersInfo[numClusters][j], allCnt[i], mCh))
+				{
+					//добавляем в кластер
+					clustersInfo[numClusters].push_back(allCnt[i]);
+
+					if (firstTest) drawCNT(allCnt[i], colour1, colour2, colour3);
+					//удаляем из списка i-й
+					//allCnt.erase(allCnt.begin() + i);
+
+					//рисуем?
+
+					//запускаем от i+1
+					//cluster(allCnt, i + 1, numClusters);
+					allCnt[i].clus = true;
+					//Sleep(20);
+				}
+			
+		}
+	}
+}
+
+bool px(CNTInfo c)
+{
+	if (c.x1 < 0 + mCh ||
+		c.x2 < 0 + mCh ||
+		c.x3 < 0 + mCh ||
+		c.x4 < 0 + mCh) return true;
+	return false;
+}
+
+bool provx(int i)
+{
+	bool min = false, max = false;
+	for (int j = 0; j < clustersInfo[i].size(); j++)
+	{
+		if (clustersInfo[i][j].x1 < 0 + mCh ||
+			clustersInfo[i][j].x2 < 0 + mCh ||
+			clustersInfo[i][j].x3 < 0 + mCh ||
+			clustersInfo[i][j].x4 < 0 + mCh) min = true;
+
+		if (clustersInfo[i][j].x1 > L - mCh ||
+			clustersInfo[i][j].x2 > L - mCh ||
+			clustersInfo[i][j].x3 > L - mCh ||
+			clustersInfo[i][j].x4 > L - mCh) max = true;
+	}
+	if (min&&max) return true;
+	return false;
+}
+bool provy(int i)
+{
+	bool min = false, max = false;
+	for (int j = 0; j < clustersInfo[i].size(); j++)
+	{
+		if (clustersInfo[i][j].y1 < 0 + mCh ||
+			clustersInfo[i][j].y2 < 0 + mCh ||
+			clustersInfo[i][j].y3 < 0 + mCh ||
+			clustersInfo[i][j].y4 < 0 + mCh) min = true;
+
+		if (clustersInfo[i][j].y1 > L - mCh ||
+			clustersInfo[i][j].y2 > L - mCh ||
+			clustersInfo[i][j].y3 > L - mCh ||
+			clustersInfo[i][j].y4 > L - mCh) max = true;
+	}
+	if (min&&max) return true;
+	return false;
+}
+
+
+void clusters()
+{
+
+	fla = true;
+	
+	allCnt.insert(allCnt.end(), cntInfo.begin(), cntInfo.end());
+	allCnt.insert(allCnt.end(), cntTransInfo.begin(), cntTransInfo.end());
+	
+	allCnt = sortV(allCnt);
+
+	int numClusters = 0;
+
+	for(int i=0; i<allCnt.size(); i++)
+	{
+		if (allCnt[i].clus) continue;
+
+		clustersInfo.push_back(vector<CNTInfo>(0));
 		if (firstTest)
 		{
-			HDC hDC = GetDC(GetConsoleWindow());
-			HPEN Pen = CreatePen(PS_SOLID, 2, RGB(0, 0, 210));
-			SelectObject(hDC, Pen);
+			colour1 = (int)(mt.getReal1() * 200);
+			colour2 = (int)(mt.getReal1() * 220);
+			colour3 = (int)(mt.getReal1() * 220);
 
-			MoveToEx(hDC, changeX + intervals[i].x1, changeY, NULL); // |
-			LineTo(hDC, changeX + intervals[i].x1, changeY + L);
-
-			Pen = CreatePen(PS_SOLID, 2, RGB(0, 0, 210));
-			SelectObject(hDC, Pen);
-
-			MoveToEx(hDC, changeX + intervals[i].x2, changeY, NULL); // |
-			LineTo(hDC, changeX + intervals[i].x2, changeY + L);
+			drawCNT(allCnt[i], colour1, colour2, colour3);
 		}
-	}
-	int pn = 4, pm = 3;
-	double **point = new double*[pn]; //в каком интервале лежит точка
-	for (int i = 0; i < pn; i++)
-		point[i] = new double[pm];
+		clustersInfo[numClusters].push_back(allCnt[i]);
+		if (!px(allCnt[i]) && i > n / 4) return;
+		allCnt[i].clus = true;
+		//clustersInfo[numClusters][(clustersInfo[numClusters].size() - 1)] = allCnt[0];
+		//TempV.pop_back();
 
-	for (int j = 0; j < cnt.size(); j++)
+		//clustersInfo[numClusters].push_back(allCnt[0]);
+		//allCnt.erase(allCnt.begin());
+		cluster(i+1, numClusters);
+		if (provx(numClusters))
+		{
+			kolClus++;
+			return;
+		}
+		numClusters++;
+	}
+
+	clustersInfo.clear();
+	allCnt = sortV2(allCnt);
+	numClusters = 0;
+
+	for (int i = 0; i<allCnt.size(); i++)
 	{
+		if (allCnt[i].clus) continue;
 
-		for (int i = 0; i < num; i++)
+		clustersInfo.push_back(vector<CNTInfo>(0));
+		if (firstTest)
 		{
-			if ( intervals[i].x1 <= cntInfo[j].x1  && cntInfo[j].x1 <= intervals[i].x2) { point[0][0] = i; point[0][1] = cntInfo[j].x1; point[0][2] = cntInfo[j].y1; }
-			if ( intervals[i].x1 <= cntInfo[j].x2  && cntInfo[j].x2 <= intervals[i].x2) { point[1][0] = i; point[1][1] = cntInfo[j].x2; point[1][2] = cntInfo[j].y2; }
-			if ( intervals[i].x1 <= cntInfo[j].x3  && cntInfo[j].x3 <= intervals[i].x2) { point[2][0] = i; point[2][1] = cntInfo[j].x3; point[2][2] = cntInfo[j].y3; }
-			if ( intervals[i].x1 <= cntInfo[j].x4  && cntInfo[j].x4 <= intervals[i].x2) { point[3][0] = i; point[3][1] = cntInfo[j].x4; point[3][2] = cntInfo[j].y4; }
+			colour1 = (int)(mt.getReal1() * 200);
+			colour2 = (int)(mt.getReal1() * 220);
+			colour3 = (int)(mt.getReal1() * 220);
+
+			drawCNT(allCnt[i], colour1, colour2, colour3);
 		}
-		//1. унт внутри интервала
-		if (point[0][0] == point[1][0] && point[1][0] == point[2][0] && point[2][0] == point[3][0])
+		clustersInfo[numClusters].push_back(CNTInfo(allCnt[i]));
+		allCnt[i].clus = true;
+		//clustersInfo[numClusters][(clustersInfo[numClusters].size() - 1)] = allCnt[0];
+		//TempV.pop_back();
+
+		//clustersInfo[numClusters].push_back(allCnt[0]);
+		//allCnt.erase(allCnt.begin());
+		cluster(i + 1, numClusters);
+		if (provx(numClusters))
 		{
-			intervals[(int)point[0][0]].summ = intervals[(int)point[0][0]].summ + cnt[j].k*radius*2.0;
-			continue;
+			kolClus++;
+			return;
 		}
-		//2. если в разных интервалах 
-
-		//сотировка по первой строке 
-		sort(point, pn, pm);
-		
-
-		double A = 1, B = 0, C = -intervals[(int)point[0][0]].x2;
-		double x1, y1, x2, y2;
-		cut(j, x1, y1, x2, y2, A, B, C); // координаты точек пересечения с границей интервала
-		double s = 0;
-
-		//2.1 случай 1222 треугольник-многоугольник
-		if (point[0][0] != point[1][0] && point[1][0] == point[2][0] && point[2][0] == point[3][0])
-		{
-			double h =dTP(point[0][1], point[0][2], A, B, C); //высота треугольника (расстояние от точки до прямой)
-			s = d(x1, y1, x2, y2)*h/2.0; //площадь треугольника
-		}
-		//2.2 случай 1122 трапеция-трапеция
-		if (point[0][0] == point[1][0] && point[1][0] != point[2][0] && point[2][0] == point[3][0])
-			s = d((point[0][1] + point[1][1]) / 2.0, (point[0][2] + point[1][2]) / 2.0, (x1 + x2) / 2.0, (y1 + y2) / 2.0) * radius * 2.0; //площадь треугольника
-
-		//2.3 случай 1112 трапеция-многоугольник
-		if (point[0][0] == point[1][0] && point[1][0] == point[2][0] && point[2][0] != point[3][0])
-		{
-			double h = abs(A*point[3][1] + B * point[3][2] + C) / sqrt(A * A + B * B); //высота треугольника справа
-			s = (cnt[j].k * 2 * radius) - d(x1, y1, x2, y2)*h / 2.0; //площадь треугольника	
-		}
-
-		intervals[(int)point[0][0]].summ = intervals[(int)point[0][0]].summ + s; //площадь треугольника в левый интервал
-		intervals[((int)point[0][0] + 1)].summ = intervals[((int)point[0][0] + 1)].summ + (cnt[j].k * 2 * radius - s);//площадь оставшейся фигуры в правый инервал
-
-		//3 унт лежит более чем в двух интервалах
-		if (point[0][0] != point[3][0])
-		{
-
-		}
-
+		numClusters++;
 	}
-	delete[]point;
+	clustersInfo.clear();
+	allCnt.clear();
 }
 
-void intervalsAlpha(int *summAlpha, int numInterAlpha)
-{
-	int*a = new int[numInterAlpha];
-	for (int i = 0; i < numInterAlpha; i++)
-		a[i] = 0;
-	for (int j = 0; j < n; j++)
-	{
-
-		if (cnt[j].a >= 0 && cnt[j].a <= 40) a[0] += 1;
-		if (cnt[j].a >= 41 && cnt[j].a <= 80) a[1] += 1;
-		if (cnt[j].a >= 81 && cnt[j].a <= 120) a[2] += 1;
-		if (cnt[j].a >= 121 && cnt[j].a <= 160) a[3] += 1;
-		if (cnt[j].a >= 161 && cnt[j].a <= 200) a[4] += 1;
-		if (cnt[j].a >= 201 && cnt[j].a <= 240) a[5] += 1;
-		if (cnt[j].a >= 241 && cnt[j].a <= 280) a[6] += 1;
-		if (cnt[j].a >= 281 && cnt[j].a <= 320) a[7] += 1;
-		if (cnt[j].a >= 321 && cnt[j].a <= 360) a[8] += 1;
-	}
-	for (int j = 0; j < numInterAlpha; j++)
-		summAlpha[j] = summAlpha[j] + a[j];
-	delete[]a;
-}
 void main()
 {
 	CreateDirectoryW(L"files", NULL);
@@ -590,74 +588,65 @@ void main()
 	cin >> mean;
 	cout << "Радиус трубки: ";
 	cin >> radius;
-	cout << "Плотность: ";
-	cin >> p;
+	//cout << "Плотность: ";
+	//cin >> p;
 	cout << "Количество испытаний: ";
 	cin >> N;
+	cout << "Длина межчастичного слоя: ";
+	cin >> mCh;
 
 	file << "Размер квадрата: " << L << endl;
 	file << "Средняя длина трубки: " << mean << endl;
 	file << "Радиус: " << radius << endl;
-	file << "Плотность: " << p << endl;
+	//file << "Плотность: " << p << endl;
 	file << "Количество испытаний: " << N << endl;
+	file << "Длина межчастичного слоя: " << mCh << endl;
 
-	n = p * L * L / (mean * 2 * radius);
-	cout << "Всего: " << n << endl;
-	file << "Всего: " << n << endl;
+	mCh = mCh * radius;
+
 	GraphInConsole();
 	devi = mean * 0.1;
 	file << setw(7) << "x" << "|" << setw(7) << "y" << "|" << setw(7) << "k" << "|" << endl;
 
 	transFlag = new bool[8];
-	int numInterRaspr = numIntervals(), numInterAlpha = 9;
-	double* summInterRaspr = new double[numInterRaspr];
-	int* summAlpha = new int[numInterAlpha];
-	for (int j = 0; j < numInterAlpha; j++)
-		summAlpha[j] = 0;
-	for (int j = 0; j < numInterRaspr; j++)
-		summInterRaspr[j] = 0;
-	for (int i = 0; i < N; i++)
-	{
-		n = p * L * L / (mean * 2 * radius);
-		if (i == 0) firstTest = true;
-		else firstTest = false;
-		file << "********************************************************************" << endl;
-		file << "Испытание" + (i+1) << endl;
-		file << "********************************************************************" << endl;
-		cout << (i + 1) << "Исп: ";
-		double start = clock();
-		packaging();
-		double finish = clock();
-		cout << "уп. за " << (finish - start) / CLOCKS_PER_SEC << "c." << endl;
-		equability();
-		
-		if (firstTest)
-			cout << "Примерное время: " << N * (((finish - start) / CLOCKS_PER_SEC) / 60) / 60 << "ч" << endl;
-		
 
-		summInterRaspr[0] = summInterRaspr[0] + intervals[(numInterRaspr + 1)].summ;
-		summInterRaspr[(numInterRaspr - 1)] = summInterRaspr[(numInterRaspr - 1)] + intervals[ 0].summ;
-		
-		for (int j = 0; j < numInterRaspr; j++)
-			summInterRaspr[j] = summInterRaspr[j] + intervals[j+1].summ;
-		
-		intervalsAlpha(summAlpha, numInterAlpha);
-		
-		delete[]intervals;
-		cnt.clear();
-		cntTrans.clear();
-		cntInfo.clear();
-		cntTransInfo.clear();
+	for (double p = 0.2; p <= 0.28; p = p + 0.02)
+	{	//цикл по плотности
+		kolClus = 0;
+		for (int i = 0; i < N; i++)
+		{
+			//100 раз запускаем с p0, считаем кол-во попаданий/100, записываем 
+			// делаем так, пока 3 раза подряд не получим 100/100
+			n = p * L * L / (mean * 2 * radius);
+			cout << n << endl;
+			if (i == 0) firstTest = true;
+			else firstTest = false;
+			file << "********************************************************************" << endl;
+			file << "Испытание" << (i + 1) << endl;
+			file << "Плотность: " << p << endl;
+			file << "********************************************************************" << endl;
+			cout << (i + 1) << "Исп: ";
+			double start = clock();
+			packaging();
+			double finish = clock();
+			//cout << "уп. за " << (finish - start) / CLOCKS_PER_SEC << "c." << endl;
+
+			//if (firstTest)
+			//	cout << "Примерное время: " << N * (((finish - start) / CLOCKS_PER_SEC) / 60) / 60 << "ч" << endl;
+
+			clusters();
+			cout << kolClus << endl;
+
+
+			cnt.clear();
+			cntTrans.clear();
+			cntInfo.clear();
+			cntTransInfo.clear();
+			
+		}
+		cout << endl << (double)kolClus/N << endl;
 	}
-
-	for (int j = 0; j < numInterRaspr; j++)
-		raspr << summInterRaspr[j]/N << endl;
-
-	for (int j = 0; j < numInterAlpha; j++)
-		dd << (double)summAlpha[j] / N << endl;
-
-	delete[]summAlpha;
-	delete[]summInterRaspr;
+	aa.close();
 	file.close();
 	raspr.close();
 	dd.close();

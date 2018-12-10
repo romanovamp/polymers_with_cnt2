@@ -12,7 +12,7 @@ CNTInfo::CNTInfo()
 	y3 = 0;
 	x4 = 0;
 	y4 = 0;
-
+	clus = false;
 }
 
 CNTInfo::CNTInfo(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, double _x4, double _y4)
@@ -25,6 +25,7 @@ CNTInfo::CNTInfo(double _x1, double _y1, double _x2, double _y2, double _x3, dou
 	y3 = _y3;
 	x4 = _x4;
 	y4 = _y4;
+	clus = false;
 }
 double coordX(double x, double k, double a)
 {
