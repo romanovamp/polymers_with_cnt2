@@ -142,17 +142,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="clusters.cpp" />
     <ClCompile Include="CNT.cpp" />
     <ClCompile Include="CNTInfo.cpp" />
-    <ClCompile Include="Interval.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CNT.h" />
     <ClInclude Include="CNTInfo.h" />
-    <ClInclude Include="Header.h" />
-    <ClInclude Include="Interval.h" />
     <ClInclude Include="mersennetwister.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

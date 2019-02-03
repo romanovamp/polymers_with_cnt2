@@ -167,6 +167,21 @@ bool vzaim(CNTInfo cntNew, CNTInfo locInfo, double sv) //true - не пересекаются
 	return true;
 }
 
+bool vzaim(CNTInfo cntNew, CNTInfo locInfo, double sv1, double sv2) //true - не пересекаются
+{
+
+	CNTInfo cI1 = CNTInfo(coordX(locInfo.x, sv1, locInfo.a - 180), coordY(locInfo.y, sv1, locInfo.a - 180), locInfo.k + 2 * sv1, locInfo.a, radius + sv1);
+	CNTInfo cI2 = CNTInfo(coordX(cntNew.x, sv2, cntNew.a - 180), coordY(cntNew.y, sv2, cntNew.a - 180), cntNew.k + 2 * sv2, cntNew.a, radius + sv2);
+
+	//if(fla)drawCNT(cI,220,220,220);
+	if (belong(cI1.x1, cI1.y1, cI2)) return false;
+	if (belong(cI1.x2, cI1.y2, cI2)) return false;
+	if (belong(cI1.x3, cI1.y3, cI2)) return false;
+	if (belong(cI1.x4, cI1.y4, cI2)) return false;
+
+	return true;
+}
+
 bool vzaim(CNTInfo cntNew, CNTInfo locInfo) //true - подходит
 {
 	//if(fla)drawCNT(cI,220,220,220); 
@@ -310,7 +325,7 @@ void packaging()
 	int fdf = 0;
 	for(int i=0; i<n; i++)
 	{
-		if (i % 1000 == 0) cout << i << endl;
+		//if (i % 1000 == 0) cout << i << endl;
 		flag = false;
 		kol = 0;
 		k = bm();
@@ -332,7 +347,7 @@ void packaging()
 				cout << " -n " << endl;
 				//?????
 				n = n - 1;
-				break;
+				return;
 			}
 			kol++;
 		} while (!test(x, y, k, a));
@@ -414,30 +429,24 @@ vector<CNTInfo> sortV2(vector<CNTInfo> A)
 	return A;
 }
 
-void cluster(int i, int numClusters)
+void cluster(int i,int numClusters)
 {
 	
-	for(;i < allCnt.size();i++)
+	for(; i < allCnt.size();i++)
 	{
 		//переделать условие, сделать условие Если растояние <= с_с, то точно кластер
 		//пока что делаем так, что если <= mCh то тоже кластер 
 		for (int j = 0; j < clustersInfo[numClusters].size(); j++)
 		{
 			if(!allCnt[i].clus)
-				if (!vzaim(allCnt[i], clustersInfo[numClusters][j], mCh) ||
-					!vzaim(clustersInfo[numClusters][j], allCnt[i], mCh))
+				//if ((sqrt(pow(allCnt[i].k, 2) + pow(radius, 2)) + sqrt(pow(clustersInfo[numClusters][j].k, 2) + pow(radius, 2))) > d(allCnt[i].x, allCnt[i].y, clustersInfo[numClusters][j].x, clustersInfo[numClusters][j].y)) continue;
+
+				if (!vzaim(allCnt[i], clustersInfo[numClusters][j], mCh, mCh))
 				{
 					//добавляем в кластер
 					clustersInfo[numClusters].push_back(allCnt[i]);
 
 					if (firstTest) drawCNT(allCnt[i], colour1, colour2, colour3);
-					//удаляем из списка i-й
-					//allCnt.erase(allCnt.begin() + i);
-
-					//рисуем?
-
-					//запускаем от i+1
-					//cluster(allCnt, i + 1, numClusters);
 					allCnt[i].clus = true;
 					//Sleep(20);
 				}
@@ -519,14 +528,14 @@ void clusters()
 			drawCNT(allCnt[i], colour1, colour2, colour3);
 		}
 		clustersInfo[numClusters].push_back(allCnt[i]);
-		if (!px(allCnt[i]) && i > n / 4) return;
+		//if (!px(allCnt[i])) return;
 		allCnt[i].clus = true;
 		//clustersInfo[numClusters][(clustersInfo[numClusters].size() - 1)] = allCnt[0];
 		//TempV.pop_back();
 
 		//clustersInfo[numClusters].push_back(allCnt[0]);
 		//allCnt.erase(allCnt.begin());
-		cluster(i+1, numClusters);
+		cluster(i + 1, numClusters);
 		if (provx(numClusters))
 		{
 			kolClus++;
@@ -578,7 +587,7 @@ void main()
 	raspr.open("./files/rasp_s.txt");
 	dd.open("./files/raspr_a.txt");
 	aa.open("./files/test.txt");
-
+	double sh = 0.1;
 
 	//ofstream aa("a.txt"), kk("k.txt");
 	setlocale(LC_ALL, "rus");
@@ -588,11 +597,13 @@ void main()
 	cin >> mean;
 	cout << "Радиус трубки: ";
 	cin >> radius;
-	//cout << "Плотность: ";
-	//cin >> p;
+	cout << "Начальная плотность: ";
+	cin >> p;
+	cout << "с шагом: ";
+	cin >> sh;
 	cout << "Количество испытаний: ";
 	cin >> N;
-	cout << "Длина межчастичного слоя: ";
+	cout << "Межфазный слой: ";
 	cin >> mCh;
 
 	file << "Размер квадрата: " << L << endl;
@@ -600,7 +611,7 @@ void main()
 	file << "Радиус: " << radius << endl;
 	//file << "Плотность: " << p << endl;
 	file << "Количество испытаний: " << N << endl;
-	file << "Длина межчастичного слоя: " << mCh << endl;
+	file << "Межчастичный слой: " << mCh << endl;
 
 	mCh = mCh * radius;
 
@@ -609,16 +620,21 @@ void main()
 	file << setw(7) << "x" << "|" << setw(7) << "y" << "|" << setw(7) << "k" << "|" << endl;
 
 	transFlag = new bool[8];
+	bool*pr = new bool[3];
+	pr[0] = false;
+	pr[1] = false;
+	pr[2] = false;
 
-	for (double p = 0.2; p <= 0.28; p = p + 0.02)
-	{	//цикл по плотности
+	for (p; p <= 0.5; p = p + sh)
+	{	
 		kolClus = 0;
+		n = p * L * L / (mean * 2 * radius);
+		cout << n << endl;
 		for (int i = 0; i < N; i++)
 		{
 			//100 раз запускаем с p0, считаем кол-во попаданий/100, записываем 
 			// делаем так, пока 3 раза подряд не получим 100/100
-			n = p * L * L / (mean * 2 * radius);
-			cout << n << endl;
+			
 			if (i == 0) firstTest = true;
 			else firstTest = false;
 			file << "********************************************************************" << endl;
@@ -629,28 +645,34 @@ void main()
 			double start = clock();
 			packaging();
 			double finish = clock();
-			//cout << "уп. за " << (finish - start) / CLOCKS_PER_SEC << "c." << endl;
+			cout << "уп. за " << (finish - start) / CLOCKS_PER_SEC << "c." << endl;
 
-			//if (firstTest)
-			//	cout << "Примерное время: " << N * (((finish - start) / CLOCKS_PER_SEC) / 60) / 60 << "ч" << endl;
+		//	if (firstTest)
+		//		cout << "Примерное время: " << N * (((finish - start) / CLOCKS_PER_SEC) / 60) / 60 << "ч" << endl;
 
 			clusters();
-			cout << kolClus << endl;
 
-
+			cout <<"Перколяционный кластер найден: " << kolClus << endl;
 			cnt.clear();
 			cntTrans.clear();
 			cntInfo.clear();
 			cntTransInfo.clear();
-			
+			clustersInfo.clear();
+			allCnt.clear();
 		}
-		cout << endl << (double)kolClus/N << endl;
+		double e = (double)kolClus / N;
+		cout << endl << e << endl;
+		aa  << e << endl;
+		if (e == 1 && !pr[0])pr[0] = true;
+		else if (e == 1 && !pr[1]) pr[1] = true; 
+			else if (e == 1 && !pr[2]) pr[2] = true; 
+		if (pr[0] && pr[1] && pr[2]) break;
 	}
 	aa.close();
 	file.close();
 	raspr.close();
 	dd.close();
-	cout << "meow! " << endl;
+	cout << "Упаковка завершена" << endl;
 	cin >> p; 
 
 
