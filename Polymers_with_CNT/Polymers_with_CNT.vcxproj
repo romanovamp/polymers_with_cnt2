@@ -142,12 +142,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CNT.cpp" />
     <ClCompile Include="CNTInfo.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CNT.h" />
     <ClInclude Include="CNTInfo.h" />
     <ClInclude Include="mersennetwister.h" />
   </ItemGroup>

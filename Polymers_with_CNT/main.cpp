@@ -8,10 +8,7 @@
 #include <iomanip>
 #include <vector>
 #include "Header.h"
-#include "CNT.h"
 #include "CNTInfo.h"
-#include "Interval.h"
-
 #include <ctime>
 
 using namespace std;
@@ -22,8 +19,6 @@ double mean, devi, radius;
 double p;
 
 int colour1=0, colour2=0, colour3=0;
-vector <CNT> cnt(0);
-vector <CNT> cntTrans(0);
 vector <CNTInfo> cntInfo(0);
 vector <CNTInfo> cntTransInfo(0);
 ofstream file, raspr, dd, aa;
@@ -191,7 +186,7 @@ bool vzaim(CNTInfo cntNew, CNTInfo locInfo) //true - подходит
 	if (belong(cntNew.x4, cntNew.y4, locInfo)) return false;
 	return true;
 }
-bool allTest(CNTInfo cntNew, vector<CNT>loc, vector <CNTInfo> locInfo) //true - удачное расположение
+bool allTest(CNTInfo cntNew, vector<CNTInfo>loc, vector <CNTInfo> locInfo) //true - удачное расположение
 {
 	for (int i = 0; i < loc.size(); i++)
 	{
@@ -218,56 +213,56 @@ bool test(double x, double y, double k, int a) //true - удачное расположение
 {
 	CNTInfo cIM = CNTInfo(x, y, k, a, radius);
 
-	if (!allTest(cIM, cnt, cntInfo) || !allTest(cIM, cntTrans, cntTransInfo)) return false;
+	if (!allTest(cIM, cntInfo, cntInfo) || !allTest(cIM, cntTransInfo, cntTransInfo)) return false;
 
 	if (cIM.x1 < 0 || cIM.x2 < 0 || cIM.x3 < 0 || cIM.x4 < 0)
 	{
 		cI = CNTInfo(x + L, y, k, a, radius);
-		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
+		if (!allTest(cI, cntInfo, cntInfo) || !allTest(cI, cntTransInfo, cntTransInfo)) return false;
 		transFlag[0] = true;
 	}
 	if (cIM.x1 > L || cIM.x2 > L || cIM.x3 > L || cIM.x4 > L)
 	{
 		cI = CNTInfo(x - L, y, k, a, radius);
-		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
+		if (!allTest(cI, cntInfo, cntInfo) || !allTest(cI, cntTransInfo, cntTransInfo)) return false;
 		transFlag[1] = true;
 	}
 	if (cIM.y1 < 0 || cIM.y2 < 0 || cIM.y3 < 0 || cIM.y4 < 0)
 	{
 		cI = CNTInfo(x, y + L, k, a, radius);
-		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
+		if (!allTest(cI, cntInfo, cntInfo) || !allTest(cI, cntTransInfo, cntTransInfo)) return false;
 		transFlag[2] = true;
 	}
 	if (cIM.y1 > L || cIM.y2 > L || cIM.y3 > L || cIM.y4 > L)
 	{
 		cI = CNTInfo(x, y - L, k, a, radius);
-		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
+		if (!allTest(cI, cntInfo, cntInfo) || !allTest(cI, cntTransInfo, cntTransInfo)) return false;
 		transFlag[3] = true;
 	}
 
 	if (cIM.x1 < 0 && cIM.y1 < 0 || cIM.x2 < 0 && cIM.y2 < 0 || cIM.x3 < 0 && cIM.y3 < 0 || cIM.x4 < 0 && cIM.y4 < 0)
 	{
 		cI = CNTInfo(x + L, y + L, k, a, radius);
-		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
+		if (!allTest(cI, cntInfo, cntInfo) || !allTest(cI, cntTransInfo, cntTransInfo)) return false;
 		transFlag[4] = true;
 	}
 	if (cIM.x1 > L && cIM.y1 < 0 || cIM.x2 > L && cIM.y2 < 0 || cIM.x3 > L && cIM.y3 < 0 || cIM.x4 > L && cIM.y4 < 0)
 	{
 		cI = CNTInfo(x - L, y + L, k, a, radius);
-		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
+		if (!allTest(cI, cntInfo, cntInfo) || !allTest(cI, cntTransInfo, cntTransInfo)) return false;
 		transFlag[5] = true;
 	}
 
 	if (cIM.x1 > L && cIM.y1 > L || cIM.x2 > L && cIM.y2 > L || cIM.x3 > L && cIM.y3 > L || cIM.x4 > L && cIM.y4 > L)
 	{
 		cI = CNTInfo(x + L, y + L, k, a, radius);
-		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
+		if (!allTest(cI, cntInfo, cntInfo) || !allTest(cI, cntTransInfo, cntTransInfo)) return false;
 		transFlag[6] = true;
 	}
 	if (cIM.x1 < 0 && cIM.y1 > L || cIM.x2 < 0 && cIM.y2 > L || cIM.x3 < 0 && cIM.y3 > L || cIM.x4 < 0 && cIM.y4 > L)
 	{
 		cI = CNTInfo(x + L, y - L, k, a, radius);
-		if (!allTest(cI, cnt, cntInfo) || !allTest(cI, cntTrans, cntTransInfo)) return false;
+		if (!allTest(cI, cntInfo, cntInfo) || !allTest(cI, cntTransInfo, cntTransInfo)) return false;
 		transFlag[7] = true;
 	}
 
@@ -306,14 +301,13 @@ string toStr(int number)
 
 bool coincides(double x, double y) //true - трубка с такими координатами уже добавлена
 {
-	for (int i = 1; i < 4 && cntTrans.size() >= i; i++)
-		if (cntTrans[cntTrans.size() - i].x == x && cntTrans[cntTrans.size() - i].y == y) return true;
+	for (int i = 1; i < 4 && cntTransInfo.size() >= i; i++)
+		if (cntTransInfo[cntTransInfo.size() - i].x == x && cntTransInfo[cntTransInfo.size() - i].y == y) return true;
 	return false;
 }
 
 void addTransCNT(double x, double y, int a, double k)
 {
-	cntTrans.push_back(CNT(x, y, a, k));
 	cntTransInfo.push_back(CNTInfo(x, y, k, a, radius));
 	if (firstTest)drawCNT(cntTransInfo[(cntTransInfo.size() - 1)], 225,0,0);
 }
@@ -346,7 +340,7 @@ void packaging()
 			{
 				cout << " -n " << endl;
 				//?????
-				n = n - 1;
+				n--;
 				return;
 			}
 			kol++;
@@ -354,7 +348,6 @@ void packaging()
 
 		if (flag)
 		{
-			cnt.push_back(CNT(x, y, a, k));
 			cntInfo.push_back(CNTInfo(x, y, k, a, radius));
 
 			if(firstTest)drawCNT(cntInfo[(cntInfo.size()-1)], 225,225,225);
@@ -363,13 +356,13 @@ void packaging()
 			if (transFlag[1]) addTransCNT(x - L, y, a, k);
 			if (transFlag[2]) addTransCNT(x, y + L, a, k);
 			if (transFlag[3]) addTransCNT(x, y - L, a, k);
-			if (transFlag[4]) addTransCNT(x + L , y + L, a, k);
+			if (transFlag[4]) addTransCNT(x + L, y + L, a, k);
 			if (transFlag[5]) addTransCNT(x - L, y + L, a, k);
 			if (transFlag[6]) addTransCNT(x - L, y - L, a, k);
 			if (transFlag[7]) addTransCNT(x + L, y - L, a, k);
 
 
-			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << endl;
+			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << setw(7) << a << "|" << endl;
 			S += k * radius * 2.0;
 		}
 	}
@@ -536,11 +529,7 @@ void clusters()
 		//clustersInfo[numClusters].push_back(allCnt[0]);
 		//allCnt.erase(allCnt.begin());
 		cluster(i + 1, numClusters);
-		if (provx(numClusters))
-		{
-			kolClus++;
-			return;
-		}
+		kolClus++;
 		numClusters++;
 	}
 
@@ -582,29 +571,32 @@ void clusters()
 
 void main()
 {
+
 	CreateDirectoryW(L"files", NULL);
 	file.open("./files/coordinates.txt");
 	raspr.open("./files/rasp_s.txt");
 	dd.open("./files/raspr_a.txt");
-	aa.open("./files/test.txt");
-	double sh = 0.1;
+	aa.open("./files/значения вероятностей.txt");
 
+	radius = 1;
 	//ofstream aa("a.txt"), kk("k.txt");
 	setlocale(LC_ALL, "rus");
 	cout << "Размер квадрата: ";
 	cin >> L;
 	cout << "Средняя длина трубки: ";
 	cin >> mean;
-	cout << "Радиус трубки: ";
-	cin >> radius;
-	cout << "Начальная плотность: ";
-	cin >> p;
-	cout << "с шагом: ";
-	cin >> sh;
+	//cout << "Радиус трубки: ";
+	//cin >> radius;
+
 	cout << "Количество испытаний: ";
 	cin >> N;
-	cout << "Межфазный слой: ";
+	cout << "Проницаемый слой: ";
 	cin >> mCh;
+	
+	L *= radius;
+	mean *= radius;
+	mCh *= radius+0.001;
+
 
 	file << "Размер квадрата: " << L << endl;
 	file << "Средняя длина трубки: " << mean << endl;
@@ -613,7 +605,7 @@ void main()
 	file << "Количество испытаний: " << N << endl;
 	file << "Межчастичный слой: " << mCh << endl;
 
-	mCh = mCh * radius;
+	
 
 	GraphInConsole();
 	devi = mean * 0.1;
@@ -625,7 +617,8 @@ void main()
 	pr[1] = false;
 	pr[2] = false;
 
-	for (p; p <= 0.5; p = p + sh)
+	aa << setw(5) << "p" << "|" << setw(5) << "вер." << "|" << endl;
+	for (p=0; p <= 0.2; p +=0.01)
 	{	
 		kolClus = 0;
 		n = p * L * L / (mean * 2 * radius);
@@ -653,8 +646,6 @@ void main()
 			clusters();
 
 			cout <<"Перколяционный кластер найден: " << kolClus << endl;
-			cnt.clear();
-			cntTrans.clear();
 			cntInfo.clear();
 			cntTransInfo.clear();
 			clustersInfo.clear();
@@ -662,7 +653,7 @@ void main()
 		}
 		double e = (double)kolClus / N;
 		cout << endl << e << endl;
-		aa  << e << endl;
+		aa << setw(5) << p << setw(5) << e << endl;
 		if (e == 1 && !pr[0])pr[0] = true;
 		else if (e == 1 && !pr[1]) pr[1] = true; 
 			else if (e == 1 && !pr[2]) pr[2] = true; 
