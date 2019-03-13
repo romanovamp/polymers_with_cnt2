@@ -82,7 +82,6 @@ void drawCNT(cnt loc, int i, int j, int k)
 {
 	if (draw)
 	{
-		RECT rect;
 		HDC hDC = GetDC(GetConsoleWindow());
 		HPEN Pen = CreatePen(PS_SOLID, 2, RGB(i, j, k));
 		SelectObject(hDC, Pen);
@@ -165,19 +164,11 @@ bool vzaim(cnt c1, cnt c2, double mF) //true - не пересекаются
 	cI1 = cntWithMF(c1, mF);
 	cI2 = cntWithMF(c2, mF);
 
-	/*if (v)
-	{
-		drawCNT(cI1, 220, 220, 220);
-		drawCNT(cI2, 220, 220, 220);
-		v = false;
-	}*/
+
 	if (belong(cI1.x1, cI1.y1, cI2)) return false;
 	if (belong(cI1.x2, cI1.y2, cI2)) return false;
 	if (belong(cI1.x3, cI1.y3, cI2)) return false;
 	if (belong(cI1.x4, cI1.y4, cI2)) return false;
-
-	//if (check(cI1.x1, cI1.y1, cI2.x1, cI2.y1, cI1.k, cI1.a, cI2.k, cI2.a)) return false;/*left-left*/
-	//if (check(cI1.x1, cI1.y1, cI2.x2, cI2.y2, cI1.k, cI1.a, cI2.k, cI2.a)) return false; /*left-right*/
 
 	if (belong(coordX(cI1.x, cI1.k / 2, cI1.a), coordY(cI1.y, cI1.k / 2, cI1.a), cI2)) return false;
 	if (belong(coordX(cI2.x, cI2.k / 2, cI2.a), coordY(cI2.y, cI2.k / 2, cI2.a), cI1)) return false;
@@ -187,7 +178,6 @@ bool vzaim(cnt c1, cnt c2, double mF) //true - не пересекаются
 
 bool vzaim(cnt cntNew, cnt locInfo) // true - не пересекаются
 {
-	//if(fla)drawCNT(cI,220,220,220); 
 	if (belong(cntNew.x1, cntNew.y1, locInfo)) return false;
 	if (belong(cntNew.x2, cntNew.y2, locInfo)) return false;
 	if (belong(cntNew.x3, cntNew.y3, locInfo)) return false;
@@ -210,8 +200,6 @@ bool allTest(cnt cntNew, vector<cnt>loc) //true - удачное расположение
 	}
 	return true;
 }
-
-
 
 bool test(double x, double y, double k, int a) //true - удачное расположение
 {
@@ -262,7 +250,6 @@ bool test(double x, double y, double k, int a) //true - удачное расположение
 		if (!allTest(cnt(x + L, y - L, k, a, radius), cntList)) return false;
 		transFlag[7] = true;
 	}
-
 	flag = true; //удачное расположение + рисуем
 	return true;
 }
@@ -337,7 +324,6 @@ void packaging(int **m)
 	double S = 0;
 	for(int i=0; i<n; i++)
 	{
-		//if (i % 1000 == 0) cout << i << endl;
 		flag = false;
 		kol = 0;
 		k = bm();
@@ -386,7 +372,7 @@ void packaging(int **m)
 		}
 	}
 	file << "Реальная плотность: " << S / (L*L) << endl;
-	flog << "реальная p: " << S / (L*L) << " ";
+	//flog << "реальная p: " << S / (L*L) << " ";
 }
 
 
@@ -425,7 +411,6 @@ bool pyL(cnt c)
 
 bool ifParent(int st, int r)
 {
-	//if (cntList[r].idParent == cntList[st].idParent && cntList[r].parent == 2 && cntList[st].parent == 2) return false;
 	if (st != cntList[r].idParent && r != cntList[st].idParent) return true;
 	return false;
 }
@@ -467,14 +452,11 @@ void percolationClusters(vector <int> &pClus, vector <int> locVector, bool coord
 			for (int j = 0; j < cntList.size(); j++)
 				if (cntList[j].idClus == cntList[locVector[i]].idClus) drawCNT(cntWithMF(cntList[j], 1), 225, 0, 0);
 			pClus.push_back(locVector[i]);
-			
 		}
 	}
 }
-
 void main()
 {
-
 	CreateDirectoryW(L"files", NULL);
 	file.open("./files/coordinates.txt");
 	//raspr.open("./files/rasp_s.txt");
@@ -492,7 +474,7 @@ void main()
 	cin >> p;*/
 	cout << "Проницаемый слой: ";
 	cin >> mF;
-	cout << "Рисовать(+/-)? ";
+	cout << "Рисовать(+/-): ";
 	char strDraw;
 	cin >> strDraw;
 
@@ -520,14 +502,14 @@ void main()
 	bool stop = false;
 	aa << setw(4) << "p" << setw(5) << "вер." << endl;
 	int pCl = 0;
-	for (double p = 0.06; p <= 0.20; p +=0.002)
+	for (double p = 0; p <= 0.20; p +=0.005)
 	{	
 		pr[0] = pr[1];
 		pr[1] = pr[2];
 
 		n = p * L * L / (mean * 2 * radius); //количество к-меров 
 		cout<<"Количество: " << n << " p = " << p <<  endl;
-
+		double fullstart = clock();
 		int sizeM = n*1.5;
 
 		int **m = new int*[sizeM];
@@ -538,6 +520,7 @@ void main()
 
 		for (int i = 0; i < N; i++)
 		{
+			double start = clock();
 			//N раз запускаем с p, считаем кол-во попаданий/N, записываем 
 			// делаем так, пока 3 раза подряд не получим 1
 			
@@ -546,23 +529,15 @@ void main()
 			file << "Плотность: " << p << endl;
 			file << "Количество: " << n << endl;
 			file << "********************************************************************" << endl;
-			//cout << (i + 1) << "Исп: ";
 
-			
-			double start = clock();
 			//успаковка 
-
 			for (int w = 0; w < sizeM; w++)
 				for (int q = 0; q < sizeM; q++)
 					m[w][q] = 0;
 
 			packaging(m);
 
-			double finish = clock();
-			cout << i << " исп. " << (finish - start) / CLOCKS_PER_SEC << "sec";
-
 			//поиск всех кластеров 
-
 			int clusters = 0;
 			visited = new bool[cntList.size()];
 			for (int w = 0; w<cntList.size(); w++)
@@ -590,9 +565,9 @@ void main()
 			percolationClusters(pClusters, x0, true, m);
 			percolationClusters(pClusters, y0, false, m);
 
-			flog <<"Всего кластеров найдено: " << clusters << endl;
-			flog << "Из них перколяционных: " << pClusters.size() << endl;
-			cout << " perClus: " << pClusters.size() << endl;
+			//flog <<"Всего кластеров найдено: " << clusters << endl;
+			//flog << "Из них перколяционных: " << pClusters.size() << endl;
+			cout << i+1 << "исп. perClus=" << pClusters.size() << " ";
 			if (pClusters.size() != 0) pCl++;
 
 			cntList.clear();
@@ -603,7 +578,7 @@ void main()
 			if (draw)
 			{
 				HWND hwnd = GetConsoleWindow(); //Берём ориентир на консольное окно (В нём будем рисовать)
-				RECT WinCoord = {}; //Массив координат окна 
+				RECT WinCoord = {}; //Массив координат окна  
 				GetWindowRect(hwnd, &WinCoord); //Узнаём координаты
 				HDC dc = GetDC(hwnd);
 
@@ -614,20 +589,22 @@ void main()
 				ReleaseDC(hwnd, dc);
 				GraphInConsole();
 			}
+
+			double finish = clock();
+			cout << (finish - start) / CLOCKS_PER_SEC << "sec"<<endl;
 		}
  
-		if ((double)pCl/N == 1.0) pr[2] = true;
-
-		aa << setw(4) << p << setw(5) << (double) pCl / N << endl;
-		cout << (double)pCl / N << endl;
+		double e = (double)pCl / N;
+		if (e == 1.0) pr[2] = true;
+		aa << setw(4) << p << setw(5) << e << endl;
+		cout << "Вероятность: " << e << endl;
 		for (int i = 0; i < sizeM; i++)
 			delete[]m[i];
 		delete[]m;
-
+		double fullfinish = clock();
+		//cout<<(fullfinish - fullstart) / CLOCKS_PER_SEC/60 << "m"<<endl;
 		if (pr[0] && pr[1] && pr[2]) break;
 	}
-
-	
 	cntList.clear();
 	aa.close();
 	file.close();

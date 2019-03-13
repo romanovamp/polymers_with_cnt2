@@ -1,22 +1,21 @@
 ﻿  main.cpp
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(89): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(90): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(91): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(92): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(93): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(94): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(95): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(96): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(97): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(98): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(99): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(100): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(85): warning C4101: rect: неиспользованная локальная переменная
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(145): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(146): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(147): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(154): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(156): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(153): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(155): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(164): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(165): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(166): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(325): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(369): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(502): warning C4244: *=: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(528): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(531): warning C4244: инициализация: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(312): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(355): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(484): warning C4244: *=: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(510): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(513): warning C4244: инициализация: преобразование "double" в "int", возможна потеря данных
   Polymers_with_CNT.vcxproj -> C:\Users\Марина\Desktop\polymers_with_cnt2\x64\Debug\Polymers_with_CNT.exe
