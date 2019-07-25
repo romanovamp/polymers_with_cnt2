@@ -15,10 +15,10 @@ using namespace std;
 
 //************************************************************************
 int L, N, n;
-double mean, devi, radius = 1;
+double mean, devi, radius;
 
 int colour1 = 0, colour2 = 0, colour3 = 0;
-ofstream file, fileP;
+ofstream file, fileP, filelog;
 bool flag, fla=false;
 bool *transFlag;
 MtRng64 mt;
@@ -30,7 +30,6 @@ double mF = 0, mF2=0;
 vector <cnt> cntList(0);
 cnt cI1, cI2;
 bool *visited, draw = false;
-
 
 //************************************************************************
 void GraphInConsole()
@@ -52,7 +51,6 @@ void GraphInConsole()
 	
 	DeleteObject(Pen);
 	ReleaseDC(GetConsoleWindow(), hDC);
-
 }
 
 bool parall(double a1, double a2, double b1, double b2)
@@ -75,6 +73,7 @@ double coordY(double y, double k, int a)
 
 cnt cntWithMF(cnt c, int mf)
 {
+	filelog << "cntWithMF" << endl;
 	return cnt(coordX(c.x, mf, c.a - 180), coordY(c.y, mf, c.a - 180), c.k + mf * 2, c.a, radius + mf);
 }
 
@@ -127,11 +126,13 @@ void equation(double x1, double y1, double x2, double y2, double &a, double &b, 
 
 bool belong(double x, double y) //true - точка лежит внутри основного квадрата
 {
+	filelog << "belong1" << endl;
 	if (x >= 0 && x <= L && y >= 0 && y <= L) return true;
 	else return false;
 }
 bool belong(double x, double y, cnt c) //true - точка (x, y) лежит внутри трубки или недопустимо близко
 {
+	filelog << "belong2" << endl;
 	if ((c.lA()*x + c.lB()*y + c.lC())*(c.rA()*x + c.rB()*y + c.rC()) > 0 &&
 		(c.bA()*x + c.bB()*y + c.bC())*(c.tA()*x + c.tB()*y + c.tC()) > 0) return true;
 	return false;
@@ -139,6 +140,7 @@ bool belong(double x, double y, cnt c) //true - точка (x, y) лежит внутри трубки
 
 bool check(double x1, double y1, double x2, double y2, double k1, double al1, double k2, double al2) //true - пересекаются
 {
+	filelog << "check" << endl;
 	double a1, a2, b1, b2, c1, c2;
 	double x, y; //(x,y) - точка пересечения прямых
 
@@ -161,9 +163,9 @@ bool check(double x1, double y1, double x2, double y2, double k1, double al1, do
 
 bool vzaim(cnt c1, cnt c2, double mF) //true - не пересекаются
 {
+	filelog << "vzaim1" << endl;
 	cI1 = cntWithMF(c1, mF);
 	cI2 = cntWithMF(c2, mF);
-
 
 	if (belong(cI1.x1, cI1.y1, cI2)) return false;
 	if (belong(cI1.x2, cI1.y2, cI2)) return false;
@@ -178,6 +180,7 @@ bool vzaim(cnt c1, cnt c2, double mF) //true - не пересекаются
 
 bool vzaim(cnt cntNew, cnt locInfo) // true - не пересекаются
 {
+	filelog << "vzaim2" << endl;
 	if (belong(cntNew.x1, cntNew.y1, locInfo)) return false;
 	if (belong(cntNew.x2, cntNew.y2, locInfo)) return false;
 	if (belong(cntNew.x3, cntNew.y3, locInfo)) return false;
@@ -187,6 +190,7 @@ bool vzaim(cnt cntNew, cnt locInfo) // true - не пересекаются
 }
 bool allTest(cnt cntNew, vector<cnt>loc) //true - удачное расположение
 {
+	filelog << "allTest" << endl;
 	for (int i = 0; i < loc.size(); i++)
 	{
 		if ((loc[i].k+radius)*2.0 < d(cntNew.x, cntNew.y, loc[i].x, loc[i].y)) continue;
@@ -203,7 +207,7 @@ bool allTest(cnt cntNew, vector<cnt>loc) //true - удачное расположение
 
 bool test(double x, double y, double k, int a) //true - удачное расположение
 {
-
+	filelog << "test" << endl;
 	cnt cIM = cnt(x, y, k, a, radius);
 
 	if (!allTest(cIM, cntList)) return false;
@@ -280,50 +284,66 @@ string toStr(int number)
 	return ss.str();
 }
 
-void createMatrix(int i, int **m) //true - удачное расположение
+//void addConnect(int i, int j, vector <matrixConnect> mCon, int parent)
+//{
+//	try
+//	{
+//		if (i != j)
+//		{
+//			mCon.push_back(matrixConnect(i, j, parent)); // попытка выделить память
+//			filelog << mCon[mCon.size() - 1].i << ' ' << mCon[mCon.size() - 1].j << endl;
+//		}
+//	}
+//	catch (bad_alloc ba)
+//	{
+//		cout << "Память не выделена" << endl;
+//		system("pause");
+//	}
+//}
+void createMatrix(int i, vector <int> mCon) //true - удачное расположение
 {
+	filelog << "createMatrix" << endl;
 	for (int j = 0; j < cntList.size(); j++)
 	{
 		if ((cntList[i].k + cntList[j].k + 2.0 * mF + 2.0) < d(cntList[j].x, cntList[j].y, cntList[i].x, cntList[i].y)) continue;
 
 		if (!vzaim(cntList[i], cntList[j], mF))
 		{
-			m[i][j] = 1;
-			m[j][i] = 1;
+			mCon.push_back(j);
 		}
 		if (!vzaim(cntList[j], cntList[i], mF))
 		{
-			m[i][j] = 1;
-			m[j][i] = 1;
+			if (mCon[mCon.size()-1] != j)
+				mCon.push_back(j);
 		}
 	}
 }
 
-void addTransCNT(double x, double y, int a, double k, int idParent, int **m)
+void addTransCNT(double x, double y, int a, double k, int idParent, vector <int> mCon)
 {
-
 	//parent = 0 - не дочерний, не родитель
 	//parent = 1 - родитель
 	//parent = 2 - дочерний
-
+	filelog << "addTransCNT" << endl;
 	cntList.push_back(cnt(x, y, k, a, radius, idParent, 2));
 	cntList[idParent].parent = 1;
 
 	int i = cntList.size() - 1;
 
 	drawCNT(cntList[i], 225, 0, 0);
-	createMatrix(i, m);
+	createMatrix(i, mCon);
 
-	m[idParent][i] = 2;
-	m[i][idParent] = 2;
+	mCon.push_back(i);
 }
-void packaging(int **m)
+void packaging(vector <vector<int>> mCon)
 {
 	double x, y, k;
 	int a, kol = 0;
 	double S = 0;
 	for(int i=0; i<n; i++)
 	{
+		filelog << "packaging i=" << i <<  endl;
+		mCon[i] = vector<int>(0);
 		flag = false;
 		kol = 0;
 		k = bm();
@@ -352,19 +372,18 @@ void packaging(int **m)
 		if (flag)
 		{
 			cntList.push_back(cnt(x, y, k, a, radius));
-			int id = cntList.size() - 1;
-			createMatrix(id, m);
+			createMatrix(i, mCon[i]);
 
-			drawCNT(cntList[id], 225, 225, 225);
+			drawCNT(cntList[i], 225, 225, 225);
 
-			if (transFlag[0]) addTransCNT(x + L, y, a, k, id, m);
-			if (transFlag[1]) addTransCNT(x - L, y, a, k, id, m);
-			if (transFlag[2]) addTransCNT(x, y + L, a, k, id, m);
-			if (transFlag[3]) addTransCNT(x, y - L, a, k, id, m);
-			if (transFlag[4]) addTransCNT(x + L, y + L, a, k, id, m);
-			if (transFlag[5]) addTransCNT(x - L, y + L, a, k, id, m);
-			if (transFlag[6]) addTransCNT(x - L, y - L, a, k, id, m);
-			if (transFlag[7]) addTransCNT(x + L, y - L, a, k, id, m);
+			if (transFlag[0]) addTransCNT(x + L, y, a, k, i, mCon[i]);
+			if (transFlag[1]) addTransCNT(x - L, y, a, k, i, mCon[i]);
+			if (transFlag[2]) addTransCNT(x, y + L, a, k, i, mCon[i]);
+			if (transFlag[3]) addTransCNT(x, y - L, a, k, i, mCon[i]);
+			if (transFlag[4]) addTransCNT(x + L, y + L, a, k, i, mCon[i]);
+			if (transFlag[5]) addTransCNT(x - L, y + L, a, k, i, mCon[i]);
+			if (transFlag[6]) addTransCNT(x - L, y - L, a, k, i, mCon[i]);
+			if (transFlag[7]) addTransCNT(x + L, y - L, a, k, i, mCon[i]);
 
 
 			file << setw(7) << x << "|" << setw(7) << y << "|" << setw(7) << k << "|" << setw(7) << a << "|" << endl;
@@ -376,16 +395,17 @@ void packaging(int **m)
 }
 
 
-void DFS(int st, int colour1, int colour2, int colour3, int clusters, int **m) // кластеризация
+void DFS(int st, int colour1, int colour2, int colour3, int clusters, vector <vector<int>> mCon) // кластеризация
 {
+	filelog << "DFS1" << endl;
 	visited[st] = true;
 	drawCNT(cntList[st], colour1, colour2, colour3);
 	cntList[st].idClus = clusters;
 
-	for (int r = 0; r < cntList.size(); r++)
+	for (int r = 1; r < mCon[st].size(); r++)
 	{
-		if ((m[st][r] != 0) && (!visited[r]))
-			DFS(r, colour1, colour2, colour3, clusters, m);
+		if (!visited[mCon[st][r]])
+			DFS(mCon[st][r], colour1, colour2, colour3, clusters, mCon);
 	}
 }
 bool px0(cnt c)
@@ -411,12 +431,14 @@ bool pyL(cnt c)
 
 bool ifParent(int st, int r)
 {
+	filelog << "ifParent" << endl;
 	if (st != cntList[r].idParent && r != cntList[st].idParent) return true;
 	return false;
 }
 
-void DFS(int st, bool &pc, bool x, int **m) //x = true - по оси x,  = false - по оси y
+void DFS(int st, bool &pc, bool x, vector <vector<int>> mCon) //x = true - по оси x,  = false - по оси y
 {
+	filelog << "DFS2" << endl;
 	visited[st] = true;
 	if (x)
 	{
@@ -428,13 +450,14 @@ void DFS(int st, bool &pc, bool x, int **m) //x = true - по оси x,  = false - по
 	}
 
 	//drawCNT(cntWithMF(cntList[st], 1), 225, 225, 225);
-	for (int r = 0; r < cntList.size(); r++)
-		if (m[st][r] !=0 && !visited[r] && ifParent(st, r))
-			DFS(r, pc, x, m);
+	for (int r = 1; r < mCon[st].size(); r++)
+		if (!visited[mCon[st][r]] && ifParent(st, mCon[st][r]))
+			DFS(mCon[st][r], pc, x, mCon);
 }
 
-void percolationClusters(vector <int> &pClus, vector <int> locVector, bool coord, int **m) //coord = true - по x, coord = false - по y
+void percolationClusters(vector <int> &pClus, vector <int> locVector, bool coord, vector <vector<int>> mCon) //coord = true - по x, coord = false - по y
 {
+	filelog << "percolationClusters" << endl;
 	for (int i = 0; i < locVector.size(); i++)
 	{
 		bool f = false;
@@ -446,7 +469,7 @@ void percolationClusters(vector <int> &pClus, vector <int> locVector, bool coord
 			visited[j] = false;
 
 		bool pc = false;
-		DFS(locVector[i], pc, coord, m);
+		DFS(locVector[i], pc, coord, mCon);
 		if (pc) // если кластер перколяционный, то добавляем в список id и рисуем
 		{
 			//for (int j = 0; j < cntList.size(); j++)
@@ -459,210 +482,142 @@ void main()
 {
 	CreateDirectoryW(L"files", NULL);
 	file.open("./files/Координаты.txt");
-	//flog.open("./files/log.txt");
+	filelog.open("./files/log.txt");
 	fileP.open("./files/Вероятности.txt");
 
+	double p;
+	char strDraw = '+';
+
 	setlocale(LC_ALL, "rus");
-	//cout << "Размер квадрата: ";
-	//cin >> L;
-	//cout << "Средняя длина трубки: ";
-	//cin >> mean; 
+	cout << "Размер квадрата: ";
+	cin >> L;
+	cout << "Средняя длина трубки: ";
+	cin >> mean; 
 	//cout << "Количество испытаний: ";
 	//cin >> N;
-	//cout << "Начальная концентрация: ";
-	//double p;
-	//cin >> p;
-	//cout << "Проницаемый слой(нач): ";
-	//cin >> mF;
-	//cout << "Проницаемый слой(кон): ";
-	//cin >> mF2;
-	/*cout << "Рисовать(+/-): ";
-	char strDraw;
-	cin >> strDraw;*/
+	cout << "Концентрация: ";
+	cin >> p;
+	cout << "Проницаемый слой: ";
+	cin >> mF;
+	//cout << "Рисовать(+/-): ";
+	//cin >> strDraw;
 
-	L = 100;
-	mean = 10;
+	N = 1;
 	radius = 1;
-	N = 100;
-	//mF = 1;
-	/*if (strDraw == '+') draw = true;
-	else draw = false;*/
-	draw = false;
+	if (strDraw == '+') draw = true;
+	else draw = false;
+
 	L *= radius;
 	mean *= radius;
-	//mF *= radius;
+	mF *= radius;
 
 	file << "Размер квадрата: " << L << endl;
 	file << "Средняя длина трубки: " << mean << endl;
 	file << "Радиус: " << radius << endl;
 	file << "Количество испытаний: " << N << endl;
-	
 
-//	devi = mean * 0.1;
-	devi = 0;
+	devi = mean * 0.1;
+
 	file << setw(7) << "x" << "|" << setw(7) << "y" << "|" << setw(7) << "k" << "|" << endl;
 
 	transFlag = new bool[8];
-	bool*pr = new bool[3];
+
 	int pCl = 0;
-	//bool first = true;
-	for (mF = 1; mF < 2; mF++)
-{
-		fileP << "Проницаемый слой: " << mF << endl;
-		fileP << "p" << setw(8) << "вер." << endl;
-		file << "Проницаемый слой: " << mF << endl;
 
-		for (int i = 0; i < 3; i++)
-			pr[i] = false;
-		bool stop = false;
-		double step = 0.005;
-		int diffP = 0;
-		double p = 0, p2=0;
-		switch ((int)mF)
-		{
-		case 1:
-		{
-			p = 0.18;
-			p2 = 0.2;
-			break;
-		}
-		default:
-			break;
-		}
-		
-		//if (!first) p = 0.07;
-		for (; p <= p2; p += step)
-		{
-			//GraphInConsole();
-			pr[0] = pr[1];
-			pr[1] = pr[2];
+	fileP << "Проницаемый слой: " << mF << endl;
+	fileP << "p" << setw(8) << "вер." << endl;
+	file << "Проницаемый слой: " << mF << endl;
 
-			n = p * L * L / (mean * 2 * radius); //количество к-меров 
-			cout << "Количество: " << n << " p = " << p << endl;
-			double fullstart = clock();
-			int sizeM = n * 1.5;
+	GraphInConsole();
 
-			int **m = new int*[sizeM];
-			for (int w = 0; w < sizeM; w++)
-				m[w] = new int[sizeM];
-
-			pCl = 0;
-
-			for (int i = 0; i < N; i++)
-			{
-				double start = clock();
-				//N раз запускаем с p, считаем кол-во попаданий/N, записываем 
-				// делаем так, пока 3 раза подряд не получим 1
-
-				file << "********************************************************************" << endl;
-				file << "Испытание " << (i + 1) << endl;
-				file << "Плотность: " << p << endl;
-				file << "Количество: " << n << endl;
-				file << "********************************************************************" << endl;
-
-				//упаковка 
-				for (int w = 0; w < sizeM; w++)
-					for (int q = 0; q < sizeM; q++)
-						m[w][q] = 0;
-
-				packaging(m);
-
-				//поиск всех кластеров 
-				int clusters = 0;
-				visited = new bool[cntList.size()];
-				for (int w = 0; w < cntList.size(); w++)
-					visited[w] = false;
-				for (int q = 0; q < cntList.size(); q++)
-				{
-					if (cntList[q].idClus == 0)
-					{
-						clusters++;
-						colour1 = (int)(mt.getReal1() * 220);
-						colour2 = (int)(mt.getReal1() * 220);
-						colour3 = (int)(mt.getReal1() * 220);
-						DFS(q, colour1, colour2, colour3, clusters, m);
-					}
-				}
-
-				//поиск перколяционных кластеров
-				vector <int> x0(0), y0(0), pClusters(0);
-				for (int w = 0; w < cntList.size(); w++)
-				{
-					if (px0(cntList[w])) x0.push_back(w);
-					if (py0(cntList[w])) y0.push_back(w);
-				}
-
-				percolationClusters(pClusters, x0, true, m);
-				percolationClusters(pClusters, y0, false, m);
-
-				//flog <<"Всего кластеров найдено: " << clusters << endl;
-				//flog << "Из них перколяционных: " << pClusters.size() << endl;
-				cout << i + 1 << "исп. perClus=" << pClusters.size() << " ";
-				if (pClusters.size() != 0)
-				{
-					pCl++;
-					//if (diffP == 0) diffP++;
-				}
-
-				cntList.clear();
-				pClusters.clear();
-				x0.clear();
-				y0.clear();
-				//if (draw)
-				//{
-				//	HWND hwnd = GetConsoleWindow(); //Берём ориентир на консольное окно (В нём будем рисовать)
-				//	RECT WinCoord = {}; //Массив координат окна  
-				//	GetWindowRect(hwnd, &WinCoord); //Узнаём координаты
-				//	HDC dc = GetDC(hwnd);
-
-				//	HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0)); //Создаём кисть определённого стиля и цвета
-				//	SelectObject(dc, brush); //Выбираем кисть
-				//	Rectangle(dc, changeX - 100, changeY - 10, WinCoord.right, 2 * L); //Рисуем новый прямоугольник, который будет небом
-				//	DeleteObject(brush); //Очищаем память от созданной, но уже ненужной кисти
-				//	ReleaseDC(hwnd, dc);
-				//	GraphInConsole();
-				//}
-
-				//if (diffP == 1) break;
-				double finish = clock();
-				cout << (finish - start) / CLOCKS_PER_SEC << "sec" << endl;
-			}
-
-			for (int i = 0; i < sizeM; i++)
-				delete[]m[i];
-			delete[]m;
-
-			//if (diffP == 1)
-			//{
-				//p -= step;
-			//	step = 0.005;
-			//	diffP++;
-				//continue;
-			//}
-			double e = (double)pCl / N;
-			if (1.0-e < 0.001)
-			{
-				pr[2] = true;
-			}
-			else
-			{
-				for (int q = 0; q < 3; q++)
-					pr[q] = false;
-			}
-			fileP << p << setw(8) << e << endl;
-			cout << "Вероятность: " << e << " mF = "<< mF << endl;
+	n = p * L * L / (mean * 2 * radius); //количество к-меров 
+	cout << "Количество: " << n << " p = " << p << endl;
 			
-			double fullfinish = clock();
-			cout<<(fullfinish - fullstart) / CLOCKS_PER_SEC/60 << "m"<<endl;
-			if (pr[0] && pr[1] && pr[2]) break;
+	double fullstart = clock();
 
+	vector <vector<int>> mCon(n); // вектор структур
+
+	for (int i = 0; i < N; i++)
+	{
+		double start = clock();
+		//N раз запускаем с p, считаем кол-во попаданий/N, записываем 
+		// делаем так, пока 3 раза подряд не получим 1
+
+		file << "********************************************************************" << endl;
+		file << "Испытание " << (i + 1) << endl;
+		file << "Плотность: " << p << endl;
+		file << "Количество: " << n << endl;
+		file << "********************************************************************" << endl;
+
+		//упаковка 
+
+		packaging(mCon);
+
+		//поиск всех кластеров 
+		int clusters = 0;
+		visited = new bool[cntList.size()];
+		for (int w = 0; w < cntList.size(); w++)
+			visited[w] = false;
+		for (int q = 0; q < cntList.size(); q++)
+		{
+			if (cntList[q].idClus == 0)
+			{
+				clusters++;
+				colour1 = (int)(mt.getReal1() * 220);
+				colour2 = (int)(mt.getReal1() * 220);
+				colour3 = (int)(mt.getReal1() * 220);
+				DFS(q, colour1, colour2, colour3, clusters, mCon);
+			}
 		}
-		//first = false;
+
+		//поиск перколяционных кластеров
+		vector <int> x0(0), y0(0), pClusters(0);
+		for (int w = 0; w < cntList.size(); w++)
+		{
+			if (px0(cntList[w])) x0.push_back(w);
+			if (py0(cntList[w])) y0.push_back(w);
+		}
+
+		percolationClusters(pClusters, x0, true, mCon);
+		percolationClusters(pClusters, y0, false, mCon);
+
+		cout << i + 1 << "исп. perClus=" << pClusters.size() << " ";
+		if (pClusters.size() != 0) pCl++;
+
+		cntList.clear();
+		pClusters.clear();
+		x0.clear();
+		y0.clear();
+		mCon.clear();
+
+#pragma region Black
+		//if (draw)
+		//{
+		//	HWND hwnd = GetConsoleWindow(); //Берём ориентир на консольное окно (В нём будем рисовать)
+		//	RECT WinCoord = {}; //Массив координат окна  
+		//	GetWindowRect(hwnd, &WinCoord); //Узнаём координаты
+		//	HDC dc = GetDC(hwnd);
+
+		//	HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0)); //Создаём кисть определённого стиля и цвета
+		//	SelectObject(dc, brush); //Выбираем кисть
+		//	Rectangle(dc, changeX - 100, changeY - 10, WinCoord.right, 2 * L); //Рисуем новый прямоугольник, который будет небом
+		//	DeleteObject(brush); //Очищаем память от созданной, но уже ненужной кисти
+		//	ReleaseDC(hwnd, dc);
+		//	GraphInConsole();
+		//}
+#pragma endregion
+
+		double finish = clock();
+		cout << (finish - start) / CLOCKS_PER_SEC << "sec" << endl;
 	}
+
+	double fullfinish = clock();
+	cout<<(fullfinish - fullstart) / CLOCKS_PER_SEC/60 << "m"<<endl;
+
 	cntList.clear();
+	filelog.close();
 	fileP.close();
 	file.close();
-	//flog.close();
 	cout << "Упаковка завершена" << endl;
 	system("pause");
 }
