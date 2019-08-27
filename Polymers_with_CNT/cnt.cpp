@@ -1,5 +1,6 @@
 #include "cnt.h"
 #include <cmath>
+#include <vector>
 #define M_PI 3.14159265358979323846
 
 //parent = 0 - не дочерний, не родитель
@@ -19,6 +20,7 @@ cnt::cnt()
 	idClus = 0;
 	idParent = -1;
 	parent = 0;
+	vector <int> m(0);
 }
 
 double coordX(double x, double k, double a)
@@ -50,6 +52,7 @@ cnt::cnt(double _x, double _y, double _k, int _a, double r, int _idParent, int _
 	idClus = 0;
 	idParent = _idParent;
 	parent = _parent;
+	vector <int> m(0);
 }
 cnt::cnt(double _x, double _y, double _k, int _a, double r)
 {
@@ -72,6 +75,7 @@ cnt::cnt(double _x, double _y, double _k, int _a, double r)
 	idClus = 0;
 	idParent = -1;
 	parent = 0;
+	vector <int> m(0);
 }
 void cnt::top(double &a, double &b, double &c)
 {

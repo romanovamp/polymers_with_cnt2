@@ -28,7 +28,7 @@ int changeX = 350, changeY=50;
 
 double mF = 0, mF2=0;
 vector <cnt> cntList(0);
-vector <vector<int>> mCon(0);
+//vector <vector<int>> mCon(0);
 
 cnt cI1, cI2;
 bool *visited, draw = false;
@@ -286,7 +286,13 @@ string toStr(int number)
 	return ss.str();
 }
 
-void createMatrix(int i) //true - удачное расположение
+void addInMatrix(int i, int j)
+{
+	cntList[i].m.push_back(j);
+	cntList[j].m.push_back(i);
+}
+
+void createMatrix(int i) 
 {
 	filelog << "createMatrix" << endl;
 	for (int j = 0; j < cntList.size(); j++)
@@ -294,19 +300,17 @@ void createMatrix(int i) //true - удачное расположение
 		if (i == j) continue;
 		if ((cntList[i].k + cntList[j].k + 2.0 * mF + 2.0) < d(cntList[j].x, cntList[j].y, cntList[i].x, cntList[i].y)) continue;
 
-		if (!vzaim(cntList[i], cntList[j], mF))
-		{
-			mCon[i].push_back(j);
-		}
+		if (!vzaim(cntList[i], cntList[j], mF)) addInMatrix(i, j);
 		if (!vzaim(cntList[j], cntList[i], mF))
 		{
-			if (mCon[i][mCon.size()-1] != j)
-				mCon[i].push_back(j);
+			if (cntList[i].m.size() == 0) addInMatrix(i, j);
+			else if (cntList[i].m[cntList[i].m.size() - 1] != j)
+					addInMatrix(i, j);
 		}
 	}
 }
 
-void addTransCNT(double x, double y, int a, double k, int idParent)
+void addTransCNT(double x, double y, int a, double k, int &idParent)
 {
 	//parent = 0 - не дочерний, не родитель
 	//parent = 1 - родитель
@@ -314,24 +318,20 @@ void addTransCNT(double x, double y, int a, double k, int idParent)
 	filelog << "addTransCNT" << endl;
 	cntList.push_back(cnt(x, y, k, a, radius, idParent, 2));
 	cntList[idParent].parent = 1;
-
 	int i = cntList.size() - 1;
-	mCon.push_back(vector<int>(0));
-
+	cntList[i].m.push_back(idParent);
 	drawCNT(cntList[i], 225, 0, 0);
 	createMatrix(i);
-
-	//mCon.push_back(i);
+	idParent++;
 }
 void packaging()
 {
 	double x, y, k;
 	int a, kol = 0;
 	double S = 0;
-	for(int i=0; i<n; i++)
+	for(int i=0, fixI=0; fixI < n; fixI++, i++)
 	{
 		filelog << "packaging i=" << i <<  endl;
-		mCon.push_back(vector<int>(0));
 		flag = false;
 		kol = 0;
 		k = bm();
@@ -390,10 +390,10 @@ void DFS(int st, int colour1, int colour2, int colour3, int clusters) // кластер
 	drawCNT(cntList[st], colour1, colour2, colour3);
 	cntList[st].idClus = clusters;
 
-	for (int r = 1; r < mCon[st].size(); r++)
+	for (int r = 0; r < cntList[st].m.size(); r++)
 	{
-		if (!visited[mCon[st][r]])
-			DFS(mCon[st][r], colour1, colour2, colour3, clusters);
+		if (!visited[cntList[st].m[r]])
+			DFS(cntList[st].m[r], colour1, colour2, colour3, clusters);
 	}
 }
 bool px0(cnt c)
@@ -438,9 +438,9 @@ void DFS(int st, bool &pc, bool x) //x = true - по оси x,  = false - по оси y
 	}
 
 	//drawCNT(cntWithMF(cntList[st], 1), 225, 225, 225);
-	for (int r = 1; r < mCon[st].size(); r++)
-		if (!visited[mCon[st][r]] && ifParent(st, mCon[st][r]))
-			DFS(mCon[st][r], pc, x);
+	for (int r = 1; r < cntList[st].m.size(); r++)
+		if (!visited[cntList[st].m[r]] && ifParent(st, cntList[st].m[r]))
+			DFS(cntList[st].m[r], pc, x);
 }
 
 void percolationClusters(vector <int> &pClus, vector <int> locVector, bool coord) //coord = true - по x, coord = false - по y
@@ -570,11 +570,19 @@ void main()
 		cout << i + 1 << "исп. perClus=" << pClusters.size() << " ";
 		if (pClusters.size() != 0) pCl++;
 
+		for (int i = 0; i < cntList.size(); i++)
+		{
+			filelog << i << "  ";
+			for (int j = 0; j < cntList[i].m.size(); j++)
+				filelog << cntList[i].m[j] << "  ";
+			filelog << endl;
+		}
+
 		cntList.clear();
 		pClusters.clear();
 		x0.clear();
 		y0.clear();
-		mCon.clear();
+		//mCon.clear();
 
 #pragma region Black
 		//if (draw)
@@ -599,6 +607,8 @@ void main()
 
 	double fullfinish = clock();
 	cout<<(fullfinish - fullstart) / CLOCKS_PER_SEC/60 << "m"<<endl;
+
+
 
 	cntList.clear();
 	filelog.close();

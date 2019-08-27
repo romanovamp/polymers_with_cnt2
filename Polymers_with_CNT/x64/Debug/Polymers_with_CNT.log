@@ -13,7 +13,7 @@ c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(157)
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(159): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(169): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(170): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(318): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
+c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(321): warning C4267: инициализация: преобразование из "size_t" в "int"; возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(498): warning C4244: *=: преобразование "double" в "int", возможна потеря данных
 c:\users\марина\desktop\polymers_with_cnt2\polymers_with_cnt\main.cpp(521): warning C4244: =: преобразование "double" в "int", возможна потеря данных
   Polymers_with_CNT.vcxproj -> C:\Users\Марина\Desktop\polymers_with_cnt2\x64\Debug\Polymers_with_CNT.exe

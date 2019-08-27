@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+using std::vector;
 
 class cnt
 {
@@ -6,6 +8,7 @@ public:
 	double x1, y1, x2, y2, x3, y3, x4, y4, x, y, k;
 	int a, idClus, idParent;
 	int parent; 
+	vector <int> m;
 	//parent = 0 - не дочерний, не родитель
 	//parent = 1 - родитель
 	//parent = 2 - дочерний
