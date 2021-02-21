@@ -199,7 +199,7 @@ bool findMinD(double x, double y, double x1, double y1, double x2, double y2)
 	if (cf > 1.0) { cf = 1.0; res = false; }
 	double xres = x1 + cf * (x2 - x1);
 	double yres = y1 + cf * (y2 - y1);
-	if (res) return dT(x, y, xres, yres) - 1.0; // минус два радиуса k-меров
+	if (res) return dT(x, y, xres, yres); 
 	else return INT_MAX;
 }
 
@@ -308,8 +308,8 @@ void createMatrix(int i, int **m) //true - удачное расположение
 		// if ((cntList[i].k + cntList[j].k + 2.0 * mF + 2.0) < dT(cntList[j].x, cntList[j].y, cntList[i].x, cntList[i].y)) continue;
 		d_min = INT_MAX; d = INT_MIN;
 
-		d_min = findMinD(cntList[i].x, 
-						 cntList[i].y, 
+		d_min = findMinD(cntList[i].x,
+						 cntList[i].y,
 						 cntList[j].x,
 						 cntList[j].y,
 						 coordX(cntList[j].x, cntList[j].k, cntList[j].a),
@@ -341,11 +341,29 @@ void createMatrix(int i, int **m) //true - удачное расположение
 					 coordY(cntList[i].x, cntList[i].k, cntList[i].a));
 		
 		if (d_min > d) d_min = d;
+		d = dT(cntList[i].x,
+			cntList[i].y,
+			cntList[j].x,
+			cntList[j].y);
+		if (d_min > d) d_min = d;
+		d = dT(cntList[i].x,
+			cntList[i].y,
+			coordX(cntList[j].x, cntList[j].k, cntList[j].a),
+			coordY(cntList[j].x, cntList[j].k, cntList[j].a));
+		if (d_min > d) d_min = d;
+		d = dT(coordX(cntList[i].x, cntList[i].k, cntList[i].a),
+			coordY(cntList[i].x, cntList[i].k, cntList[i].a),
+			cntList[j].x,
+			cntList[j].y);
+		if (d_min > d) d_min = d;
+		d = dT(coordX(cntList[i].x, cntList[i].k, cntList[i].a),
+			coordY(cntList[i].x, cntList[i].k, cntList[i].a),
+			coordX(cntList[j].x, cntList[j].k, cntList[j].a),
+			coordY(cntList[j].x, cntList[j].k, cntList[j].a));
+		if (d_min > d) d_min = d;
 
-		if (d_min == INT_MAX) continue;
 		//if (d_min > 2.0 * mF && d_min <= mF) continue;
-		double U_real = pow(aa, 2) / pow(d_min, 6);
-
+		double U_real = pow(aa, 2) / pow(d_min-1.0, 6);// минус два радиуса k-меров
 		if (abs(mt.getReal1() - U_real / U_max) <= 0.000001) continue;
 
 		m[i][j] = 1;
@@ -550,7 +568,7 @@ void main()
 
 	L = 5000;
 	mean = 100;
-	N = 100;
+	N = 1000;
 	//mF = 1;
 	/*if (strDraw == '+') draw = true;
 	else draw = false;*/
@@ -585,9 +603,9 @@ void main()
 		for (int i = 0; i < 3; i++)
 			pr[i] = false;
 		bool stop = false;
-		double step = 0.000005;
+		double step = 0.0000005;
 		int diffP = 0;
-		double p = 0.0000001, p2= 0.1;
+		double p = 0.00000001, p2= 0.1;
 		for (; p < p2; p += step)
 		{
 			//GraphInConsole();
