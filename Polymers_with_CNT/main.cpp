@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <vector>
 #include <ctime>
+#include <limits>
 #include "cnt.h"
 #define M_PI 3.14159265358979323846
 
@@ -15,7 +16,7 @@ using namespace std;
 
 //************************************************************************
 int L, N, n;
-double mean, devi, radius = 1;
+double mean, devi, radius = 0.5;
 
 int colour1 = 0, colour2 = 0, colour3 = 0;
 ofstream file, fileP;
@@ -26,11 +27,13 @@ bool ready = false;
 double second = 0.0;
 int changeX = 350, changeY=50;
 
-double mF = 0, mF2=0;
+double mF = 0, mF2 = 0;
 vector <cnt> cntList(0);
 cnt cI1, cI2;
 bool *visited, draw = false;
-
+double aa = 3669.163;
+double r_min = 0.154;
+double U_max = pow(aa, 2) / pow(r_min, 6);
 
 //************************************************************************
 void GraphInConsole()
@@ -75,7 +78,7 @@ double coordY(double y, double k, int a)
 
 cnt cntWithMF(cnt c, int mf)
 {
-	return cnt(coordX(c.x, mf, c.a - 180), coordY(c.y, mf, c.a - 180), c.k + mf * 2, c.a, radius + mf);
+	return cnt(coordX(c.x, mf, c.a - 180), coordY(c.y, mf, c.a - 180), c.k + mf * 2.0, c.a, radius + mf);
 }
 
 void drawCNT(cnt loc, int i, int j, int k)
@@ -103,10 +106,11 @@ void drawCNT(cnt loc, int i, int j, int k)
 	}
 
 }
-double d(double x1, double y1, double x2, double y2) //расстояние от точки до точки
+double dT(double x1, double y1, double x2, double y2) //расстояние от точки до точки
 {
 	return sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
 }
+
 double dTP(double x, double y, double A, double B, double C) //расстояние от точки до прямой
 {
 	return abs(A * x + B * y + C) / sqrt(A * A + B * B);
@@ -116,7 +120,6 @@ double D(double x1, double y1, double x2, double y2, double x, double y)
 {
 	return (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
 }
-
 
 void equation(double x1, double y1, double x2, double y2, double &a, double &b, double &c) // уравнение прямой 
 {
@@ -130,6 +133,7 @@ bool belong(double x, double y) //true - точка лежит внутри основного квадрата
 	if (x >= 0 && x <= L && y >= 0 && y <= L) return true;
 	else return false;
 }
+
 bool belong(double x, double y, cnt c) //true - точка (x, y) лежит внутри трубки или недопустимо близко
 {
 	if ((c.lA()*x + c.lB()*y + c.lC())*(c.rA()*x + c.rB()*y + c.rC()) > 0 &&
@@ -164,14 +168,13 @@ bool vzaim(cnt c1, cnt c2, double mF) //true - не пересекаются
 	cI1 = cntWithMF(c1, mF);
 	cI2 = cntWithMF(c2, mF);
 
-
 	if (belong(cI1.x1, cI1.y1, cI2)) return false;
 	if (belong(cI1.x2, cI1.y2, cI2)) return false;
 	if (belong(cI1.x3, cI1.y3, cI2)) return false;
 	if (belong(cI1.x4, cI1.y4, cI2)) return false;
 
-	if (belong(coordX(cI1.x, cI1.k / 2, cI1.a), coordY(cI1.y, cI1.k / 2, cI1.a), cI2)) return false;
-	if (belong(coordX(cI2.x, cI2.k / 2, cI2.a), coordY(cI2.y, cI2.k / 2, cI2.a), cI1)) return false;
+	if (belong(coordX(cI1.x, cI1.k / 2.0, cI1.a), coordY(cI1.y, cI1.k / 2.0, cI1.a), cI2)) return false;
+	if (belong(coordX(cI2.x, cI2.k / 2.0, cI2.a), coordY(cI2.y, cI2.k / 2.0, cI2.a), cI1)) return false;
 
 	return true;
 }
@@ -185,11 +188,26 @@ bool vzaim(cnt cntNew, cnt locInfo) // true - не пересекаются
 
 	return true;
 }
+
+bool findMinD(double x, double y, double x1, double y1, double x2, double y2)
+{
+	double L = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+	double PR = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
+	bool res = true;
+	double cf = PR / L;
+	if (cf < 0.0) { cf = 0.0; res = false; }
+	if (cf > 1.0) { cf = 1.0; res = false; }
+	double xres = x1 + cf * (x2 - x1);
+	double yres = y1 + cf * (y2 - y1);
+	if (res) return dT(x, y, xres, yres) - 1.0; // минус два радиуса k-меров
+	else return INT_MAX;
+}
+
 bool allTest(cnt cntNew, vector<cnt>loc) //true - удачное расположение
 {
 	for (int i = 0; i < loc.size(); i++)
 	{
-		if ((loc[i].k+radius)*2.0 < d(cntNew.x, cntNew.y, loc[i].x, loc[i].y)) continue;
+		if ((loc[i].k+radius)*2.0 < dT(cntNew.x, cntNew.y, loc[i].x, loc[i].y)) continue;
 
 		if (!vzaim(cntNew, loc[i])) return false;
 		if (!vzaim(loc[i], cntNew)) return false;
@@ -253,6 +271,7 @@ bool test(double x, double y, double k, int a) //true - удачное расположение
 	flag = true; //удачное расположение + рисуем
 	return true;
 }
+
 double bm()
 {
 	if (ready)
@@ -273,6 +292,7 @@ double bm()
 	ready = true;
 	return (r * v * devi + mean);
 }
+
 string toStr(int number)
 {
 	stringstream ss;
@@ -282,20 +302,64 @@ string toStr(int number)
 
 void createMatrix(int i, int **m) //true - удачное расположение
 {
+	double d_min, d;
 	for (int j = 0; j < cntList.size(); j++)
 	{
-		if ((cntList[i].k + cntList[j].k + 2.0 * mF + 2.0) < d(cntList[j].x, cntList[j].y, cntList[i].x, cntList[i].y)) continue;
+		// if ((cntList[i].k + cntList[j].k + 2.0 * mF + 2.0) < dT(cntList[j].x, cntList[j].y, cntList[i].x, cntList[i].y)) continue;
+		d_min = INT_MAX; d = INT_MIN;
 
-		if (!vzaim(cntList[i], cntList[j], mF))
+		d_min = findMinD(cntList[i].x, 
+						 cntList[i].y, 
+						 cntList[j].x,
+						 cntList[j].y,
+						 coordX(cntList[j].x, cntList[j].k, cntList[j].a),
+						 coordY(cntList[j].x, cntList[j].k, cntList[j].a));
+
+		d = findMinD(coordX(cntList[i].x, cntList[i].k, cntList[i].a), 
+					 coordY(cntList[i].y, cntList[i].k, cntList[i].a), 
+			         cntList[j].x,
+					 cntList[j].y,
+					 coordX(cntList[j].x, cntList[j].k, cntList[j].a),
+					 coordY(cntList[j].x, cntList[j].k, cntList[j].a));
+
+		if (d_min > d) d_min = d;
+
+		d = findMinD(cntList[j].x,
+					 cntList[j].y,
+					 cntList[i].x, 
+					 cntList[i].y, 
+					 coordX(cntList[i].x, cntList[i].k, cntList[i].a), 
+					 coordY(cntList[i].x, cntList[i].k, cntList[i].a));
+
+		if (d_min > d) d_min = d;
+
+		d = findMinD(coordX(cntList[j].x, cntList[j].k, cntList[j].a),
+					 coordX(cntList[j].y, cntList[j].k, cntList[j].a),
+					 cntList[i].x,
+					 cntList[i].y,
+					 coordX(cntList[i].x, cntList[i].k, cntList[i].a),
+					 coordY(cntList[i].x, cntList[i].k, cntList[i].a));
+		
+		if (d_min > d) d_min = d;
+
+		if (d_min == INT_MAX) continue;
+		//if (d_min > 2.0 * mF && d_min <= mF) continue;
+		double U_real = pow(aa, 2) / pow(d_min, 6);
+
+		if (abs(mt.getReal1() - U_real / U_max) <= 0.000001) continue;
+
+		m[i][j] = 1;
+		m[j][i] = 1;
+
+		/*if (!vzaim(cntList[i], cntList[j], mF))
 		{
-			m[i][j] = 1;
-			m[j][i] = 1;
+			
 		}
 		if (!vzaim(cntList[j], cntList[i], mF))
 		{
 			m[i][j] = 1;
 			m[j][i] = 1;
-		}
+		}*/
 	}
 }
 
@@ -342,7 +406,7 @@ void packaging(int **m)
 			}
 			else
 			{
-				cout << " n-- " << endl;
+				cout << " stop " << endl;
 				n--;
 				return;
 			}
@@ -390,22 +454,26 @@ void DFS(int st, int colour1, int colour2, int colour3, int clusters, int **m) /
 }
 bool px0(cnt c)
 {
-	if (c.x1 < 0 + mF || c.x2 < 0 + mF || c.x3 < 0 + mF || c.x4 < 0 + mF) return true;
+	// if (c.x1 < 0 + mF || c.x2 < 0 + mF || c.x3 < 0 + mF || c.x4 < 0 + mF) return true;
+	if (c.x1 < 0 || c.x2 < 0 || c.x3 < 0 || c.x4 < 0) return true;
 	return false;
 }
 bool pxL(cnt c)
 {
-	if (c.x1 > L - mF || c.x2 > L - mF || c.x3 > L - mF || c.x4 > L - mF) return true;
+	// if (c.x1 > L - mF || c.x2 > L - mF || c.x3 > L - mF || c.x4 > L - mF) return true;
+	if (c.x1 > L || c.x2 > L || c.x3 > L || c.x4 > L) return true;
 	return false;
 }
 bool py0(cnt c)
 {
-	if (c.y1 < 0 + mF || c.y2 < 0 + mF || c.y3 < 0 + mF || c.y4 < 0 + mF) return true;
+	// if (c.y1 < 0 + mF || c.y2 < 0 + mF || c.y3 < 0 + mF || c.y4 < 0 + mF) return true;
+	if (c.y1 < 0 || c.y2 < 0 || c.y3 < 0 || c.y4 < 0) return true;
 	return false;
 }
 bool pyL(cnt c)
 {
-	if (c.y1 > L - mF || c.y2 > L - mF || c.y3 > L - mF || c.y4 > L - mF) return true;
+	// if (c.y1 > L - mF || c.y2 > L - mF || c.y3 > L - mF || c.y4 > L - mF) return true;
+	if (c.y1 > L || c.y2 > L || c.y3 > L || c.y4 > L) return true;
 	return false;
 }
 
@@ -449,8 +517,8 @@ void percolationClusters(vector <int> &pClus, vector <int> locVector, bool coord
 		DFS(locVector[i], pc, coord, m);
 		if (pc) // если кластер перколяционный, то добавляем в список id и рисуем
 		{
-			//for (int j = 0; j < cntList.size(); j++)
-			//	if (cntList[j].idClus == cntList[locVector[i]].idClus) drawCNT(cntWithMF(cntList[j], 1), 225, 225, 225);
+			for (int j = 0; j < cntList.size(); j++)
+				if (cntList[j].idClus == cntList[locVector[i]].idClus) drawCNT(cntWithMF(cntList[j], 1), 225, 225, 225);
 			pClus.push_back(locVector[i]);
 		}
 	}
@@ -480,21 +548,19 @@ void main()
 	char strDraw;
 	cin >> strDraw;*/
 
-	L = 100;
-	mean = 10;
-	radius = 1;
+	L = 5000;
+	mean = 100;
 	N = 100;
 	//mF = 1;
 	/*if (strDraw == '+') draw = true;
 	else draw = false;*/
-	draw = false;
 	L *= radius;
 	mean *= radius;
 	//mF *= radius;
 
 	file << "Размер квадрата: " << L << endl;
 	file << "Средняя длина трубки: " << mean << endl;
-	file << "Радиус: " << radius << endl;
+	//file << "Радиус: " << radius << endl;
 	file << "Количество испытаний: " << N << endl;
 	
 
@@ -506,8 +572,12 @@ void main()
 	bool*pr = new bool[3];
 	int pCl = 0;
 	//bool first = true;
-	for (mF = 1; mF < 2; mF++)
-{
+	/*for (mF = 1; mF < 2; mF++)
+	{*/	
+		
+		//U_max = pow(aa, 2) / pow(r_max, 6);
+		//range_min = U_min / U_max;
+		//range_max = U_max / U_max;
 		fileP << "Проницаемый слой: " << mF << endl;
 		fileP << "p" << setw(8) << "вер." << endl;
 		file << "Проницаемый слой: " << mF << endl;
@@ -515,32 +585,19 @@ void main()
 		for (int i = 0; i < 3; i++)
 			pr[i] = false;
 		bool stop = false;
-		double step = 0.005;
+		double step = 0.000005;
 		int diffP = 0;
-		double p = 0, p2=0;
-		switch ((int)mF)
-		{
-		case 1:
-		{
-			p = 0.18;
-			p2 = 0.2;
-			break;
-		}
-		default:
-			break;
-		}
-		
-		//if (!first) p = 0.07;
-		for (; p <= p2; p += step)
+		double p = 0.0000001, p2= 0.1;
+		for (; p < p2; p += step)
 		{
 			//GraphInConsole();
 			pr[0] = pr[1];
 			pr[1] = pr[2];
 
 			n = p * L * L / (mean * 2 * radius); //количество к-меров 
-			cout << "Количество: " << n << " p = " << p << endl;
+			cout << "Количество: " << n << " p = " << p;
 			double fullstart = clock();
-			int sizeM = n * 1.5;
+			int sizeM = n * 10;
 
 			int **m = new int*[sizeM];
 			for (int w = 0; w < sizeM; w++)
@@ -548,9 +605,10 @@ void main()
 
 			pCl = 0;
 
+			double start = clock();
 			for (int i = 0; i < N; i++)
 			{
-				double start = clock();
+				
 				//N раз запускаем с p, считаем кол-во попаданий/N, записываем 
 				// делаем так, пока 3 раза подряд не получим 1
 
@@ -595,9 +653,9 @@ void main()
 				percolationClusters(pClusters, x0, true, m);
 				percolationClusters(pClusters, y0, false, m);
 
-				//flog <<"Всего кластеров найдено: " << clusters << endl;
-				//flog << "Из них перколяционных: " << pClusters.size() << endl;
-				cout << i + 1 << "исп. perClus=" << pClusters.size() << " ";
+				//cout <<"Всего кластеров найдено: " << clusters << endl;
+				//cout << "Из них перколяционных: " << pClusters.size() << endl;
+				//cout << i + 1 << "исп. perClus=" << pClusters.size() << " ";
 				if (pClusters.size() != 0)
 				{
 					pCl++;
@@ -608,7 +666,7 @@ void main()
 				pClusters.clear();
 				x0.clear();
 				y0.clear();
-				//if (draw)
+				//if (!draw)
 				//{
 				//	HWND hwnd = GetConsoleWindow(); //Берём ориентир на консольное окно (В нём будем рисовать)
 				//	RECT WinCoord = {}; //Массив координат окна  
@@ -624,9 +682,11 @@ void main()
 				//}
 
 				//if (diffP == 1) break;
-				double finish = clock();
-				cout << (finish - start) / CLOCKS_PER_SEC << "sec" << endl;
+				
 			}
+
+			double finish = clock();
+			cout << "  "<< (finish - start) / CLOCKS_PER_SEC << "sec";
 
 			for (int i = 0; i < sizeM; i++)
 				delete[]m[i];
@@ -650,15 +710,15 @@ void main()
 					pr[q] = false;
 			}
 			fileP << p << setw(8) << e << endl;
-			cout << "Вероятность: " << e << " mF = "<< mF << endl;
+			cout << "  Вероятность: " << e << endl;
 			
 			double fullfinish = clock();
-			cout<<(fullfinish - fullstart) / CLOCKS_PER_SEC/60 << "m"<<endl;
+			//cout<<(fullfinish - fullstart) / CLOCKS_PER_SEC/60 << "m"<<endl;
 			if (pr[0] && pr[1] && pr[2]) break;
 
 		}
 		//first = false;
-	}
+	//}
 	cntList.clear();
 	fileP.close();
 	file.close();
