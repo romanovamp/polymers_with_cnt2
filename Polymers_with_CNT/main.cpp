@@ -364,7 +364,7 @@ void createMatrix(int i, int **m) //true - удачное расположение
 
 		//if (d_min > 2.0 * mF && d_min <= mF) continue;
 		double U_real = pow(aa, 2) / pow(d_min-1.0, 6);// минус два радиуса k-меров
-		if (abs(mt.getReal1() - U_real / U_max) <= 0.000001) continue;
+		if (U_real / U_max >= mt.getReal1()) continue;
 
 		m[i][j] = 1;
 		m[j][i] = 1;
@@ -566,9 +566,9 @@ void main()
 	char strDraw;
 	cin >> strDraw;*/
 
-	L = 5000;
+	L = 1000;
 	mean = 100;
-	N = 1000;
+	N = 100;
 	//mF = 1;
 	/*if (strDraw == '+') draw = true;
 	else draw = false;*/
@@ -603,9 +603,9 @@ void main()
 		for (int i = 0; i < 3; i++)
 			pr[i] = false;
 		bool stop = false;
-		double step = 0.0000005;
+		double step = 0.00005;
 		int diffP = 0;
-		double p = 0.00000001, p2= 0.1;
+		double p = 0.000001, p2= 0.1;
 		for (; p < p2; p += step)
 		{
 			//GraphInConsole();
