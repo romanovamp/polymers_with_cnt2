@@ -19,13 +19,14 @@ int L, N, n;
 double mean, devi, radius = 0.5;
 
 int colour1 = 0, colour2 = 0, colour3 = 0;
-ofstream file, fileP;
+ofstream file, fileP, flog;
 bool flag, fla=false;
 bool *transFlag;
 MtRng64 mt;
 bool ready = false;
 double second = 0.0;
 int changeX = 350, changeY=50;
+double eps = 0.00001;
 
 double mF = 0, mF2 = 0;
 vector <cnt> cntList(0);
@@ -136,8 +137,8 @@ bool belong(double x, double y) //true - точка лежит внутри основного квадрата
 
 bool belong(double x, double y, cnt c) //true - точка (x, y) лежит внутри трубки или недопустимо близко
 {
-	if ((c.lA()*x + c.lB()*y + c.lC())*(c.rA()*x + c.rB()*y + c.rC()) > 0 &&
-		(c.bA()*x + c.bB()*y + c.bC())*(c.tA()*x + c.tB()*y + c.tC()) > 0) return true;
+	if ((c.lA()*x + c.lB()*y + c.lC())*(c.rA()*x + c.rB()*y + c.rC()) > eps &&
+		(c.bA()*x + c.bB()*y + c.bC())*(c.tA()*x + c.tB()*y + c.tC()) > eps) return true;
 	return false;
 }
 
@@ -168,10 +169,18 @@ bool vzaim(cnt c1, cnt c2, double mF) //true - не пересекаются
 	cI1 = cntWithMF(c1, mF);
 	cI2 = cntWithMF(c2, mF);
 
+	drawCNT(cI1, 225, 225, 225);
+	drawCNT(cI2, 225, 225, 225);
+
 	if (belong(cI1.x1, cI1.y1, cI2)) return false;
 	if (belong(cI1.x2, cI1.y2, cI2)) return false;
 	if (belong(cI1.x3, cI1.y3, cI2)) return false;
 	if (belong(cI1.x4, cI1.y4, cI2)) return false;
+
+	if (belong(cI2.x1, cI2.y1, cI1)) return false;
+	if (belong(cI2.x2, cI2.y2, cI1)) return false;
+	if (belong(cI2.x3, cI2.y3, cI1)) return false;
+	if (belong(cI2.x4, cI2.y4, cI1)) return false;
 
 	if (belong(coordX(cI1.x, cI1.k / 2.0, cI1.a), coordY(cI1.y, cI1.k / 2.0, cI1.a), cI2)) return false;
 	if (belong(coordX(cI2.x, cI2.k / 2.0, cI2.a), coordY(cI2.y, cI2.k / 2.0, cI2.a), cI1)) return false;
@@ -189,7 +198,7 @@ bool vzaim(cnt cntNew, cnt locInfo) // true - не пересекаются
 	return true;
 }
 
-bool findMinD(double x, double y, double x1, double y1, double x2, double y2)
+double findMinD(double x, double y, double x1, double y1, double x2, double y2)
 {
 	double L = (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
 	double PR = (x - x1) * (x2 - x1) + (y - y1) * (y2 - y1);
@@ -200,7 +209,7 @@ bool findMinD(double x, double y, double x1, double y1, double x2, double y2)
 	double xres = x1 + cf * (x2 - x1);
 	double yres = y1 + cf * (y2 - y1);
 	if (res) return dT(x, y, xres, yres); 
-	else return INT_MAX;
+	else return DBL_MAX;
 }
 
 bool allTest(cnt cntNew, vector<cnt>loc) //true - удачное расположение
@@ -300,84 +309,120 @@ string toStr(int number)
 	return ss.str();
 }
 
+double point_to_segment_distance(double x, double y, double ax, double ay, double bx, double by)
+{
+	// Обеспечим, чтобы наш отрезок был более горизонтальным, чем вертикальным
+	double dx = bx - ax, dy = by - ay;
+	if (std::abs(dx) < std::abs(dy))
+	{
+		std::swap(x, y);
+		std::swap(ax, ay);
+		std::swap(bx, by);
+		std::swap(dx, dy);
+	}
+
+	// Обеспечим, чтобы наш отрезок шел слева направо
+	if (dx < 0)
+	{
+		std::swap(ax, bx);
+		std::swap(ay, by);
+		dx = -dx;
+		dy = -dy;
+	}
+
+	// Действия, выполненные выше, нужны только для того, чтобы впоследствии
+	// мы могли проверить, попадает ли точка (px, py) (см. ниже) внутрь нашего
+	// отрезка (ax, ay)-(bx, by). Теперь это можно сделать простым сравнением
+	// `px < ax` и `px > bx` 
+
+	// Строим уравнение прямой
+	double A = dy, B = -dx, C = -(A * ax + B * bx);
+
+	// Вычисляем ненормированное ориентированное расстояние от точки до прямой
+	double d = A * x + B * y + C;
+
+	// Находим проекцию нашей точки на прямую
+	double absq = A * A + B * B;
+	double px = x - A * d / absq, py = y - B * d / absq;
+
+	// Проверяем, не попали ли мы за пределы отрезка
+	if (px < ax)
+	{
+		px = ax;
+		py = ay;
+	}
+	else if (px > bx)
+	{
+		px = bx;
+		py = by;
+	}
+
+	// Возвращаем расстояние
+	x -= px;
+	y -= py;
+	return sqrt(x * x + y * y);
+}
+
 void createMatrix(int i, int **m) //true - удачное расположение
 {
 	double d_min, d;
+	double iX1, iY1, iX2, iY2, jX1, jY1, jX2, jY2;
 	for (int j = 0; j < cntList.size(); j++)
 	{
-		// if ((cntList[i].k + cntList[j].k + 2.0 * mF + 2.0) < dT(cntList[j].x, cntList[j].y, cntList[i].x, cntList[i].y)) continue;
-		d_min = INT_MAX; d = INT_MIN;
-
-		d_min = findMinD(cntList[i].x,
-						 cntList[i].y,
-						 cntList[j].x,
-						 cntList[j].y,
-						 coordX(cntList[j].x, cntList[j].k, cntList[j].a),
-						 coordY(cntList[j].x, cntList[j].k, cntList[j].a));
-
-		d = findMinD(coordX(cntList[i].x, cntList[i].k, cntList[i].a), 
-					 coordY(cntList[i].y, cntList[i].k, cntList[i].a), 
-			         cntList[j].x,
-					 cntList[j].y,
-					 coordX(cntList[j].x, cntList[j].k, cntList[j].a),
-					 coordY(cntList[j].x, cntList[j].k, cntList[j].a));
-
-		if (d_min > d) d_min = d;
-
-		d = findMinD(cntList[j].x,
-					 cntList[j].y,
-					 cntList[i].x, 
-					 cntList[i].y, 
-					 coordX(cntList[i].x, cntList[i].k, cntList[i].a), 
-					 coordY(cntList[i].x, cntList[i].k, cntList[i].a));
-
-		if (d_min > d) d_min = d;
-
-		d = findMinD(coordX(cntList[j].x, cntList[j].k, cntList[j].a),
-					 coordX(cntList[j].y, cntList[j].k, cntList[j].a),
-					 cntList[i].x,
-					 cntList[i].y,
-					 coordX(cntList[i].x, cntList[i].k, cntList[i].a),
-					 coordY(cntList[i].x, cntList[i].k, cntList[i].a));
+		if (i == j) continue;
+		//if ((cntList[i].k + cntList[j].k + 2.0 * mF + 1.0) < dT(cntList[j].x, cntList[j].y, cntList[i].x, cntList[i].y)) continue;
 		
-		if (d_min > d) d_min = d;
-		d = dT(cntList[i].x,
-			cntList[i].y,
-			cntList[j].x,
-			cntList[j].y);
-		if (d_min > d) d_min = d;
-		d = dT(cntList[i].x,
-			cntList[i].y,
-			coordX(cntList[j].x, cntList[j].k, cntList[j].a),
-			coordY(cntList[j].x, cntList[j].k, cntList[j].a));
-		if (d_min > d) d_min = d;
-		d = dT(coordX(cntList[i].x, cntList[i].k, cntList[i].a),
-			coordY(cntList[i].x, cntList[i].k, cntList[i].a),
-			cntList[j].x,
-			cntList[j].y);
-		if (d_min > d) d_min = d;
-		d = dT(coordX(cntList[i].x, cntList[i].k, cntList[i].a),
-			coordY(cntList[i].x, cntList[i].k, cntList[i].a),
-			coordX(cntList[j].x, cntList[j].k, cntList[j].a),
-			coordY(cntList[j].x, cntList[j].k, cntList[j].a));
-		if (d_min > d) d_min = d;
-
-		//if (d_min > 2.0 * mF && d_min <= mF) continue;
-		double U_real = pow(aa, 2) / pow(d_min-1.0, 6);// минус два радиуса k-меров
-		if (U_real / U_max >= mt.getReal1()) continue;
-
-		m[i][j] = 1;
-		m[j][i] = 1;
-
-		/*if (!vzaim(cntList[i], cntList[j], mF))
-		{
-			
-		}
 		if (!vzaim(cntList[j], cntList[i], mF))
 		{
-			m[i][j] = 1;
-			m[j][i] = 1;
-		}*/
+
+			iX1 = cntList[i].x;
+			iY1 = cntList[i].y;
+			iX2 = coordX(cntList[i].x, cntList[i].k, cntList[i].a);
+			iY2 = coordY(cntList[i].y, cntList[i].k, cntList[i].a);
+			jX1 = cntList[j].x;
+			jY1 = cntList[j].y;
+			jX2 = coordX(cntList[j].x, cntList[j].k, cntList[j].a);
+			jY2 = coordY(cntList[j].y, cntList[j].k, cntList[j].a);
+
+			d_min = DBL_MAX; d = DBL_MAX;
+
+			d = dT(iX1, iY1, jX1, jY1);
+			if (d_min > d) d_min = d;
+
+			d = dT(iX2, iY2, jX2, jY2);
+			if (d_min > d) d_min = d;
+
+			d = dT(iX1, iY1, jX2, jY2);
+			if (d_min > d) d_min = d;
+
+			d = dT(iX2, iY2, jX1, jY1);
+			if (d_min > d) d_min = d;
+
+			d = point_to_segment_distance(iX1, iY1, jX1, jY1, jX2, jY2);
+			if (d_min > d) d_min = d;
+
+			d = point_to_segment_distance(iX2, iY2, jX1, jY1, jX2, jY2);
+			if (d_min > d) d_min = d;
+
+			d = point_to_segment_distance(jX1, jY1, iX1, iY1, iX2, iY2);
+			if (d_min > d) d_min = d;
+
+			d = point_to_segment_distance(jX2, jY2, iX1, iY1, iX2, iY2);
+			if (d_min > d) d_min = d;
+
+			//if (d_min > 2.0 * mF) continue;
+			double U_real = pow(aa, 2) / pow(d_min, 6);// d_min-1.0 минус два радиуса k-меров
+
+			double rand_real = mt.getReal1();
+			//flog << "d_min: " << d_min << "   U_real: " << U_real << "   U_real / U_max: " << U_real / U_max << "   rand_real: " << rand_real << endl;
+
+			if (U_real / U_max <= rand_real)
+			{
+				m[i][j] = 1;
+				m[j][i] = 1; 
+			}
+		
+		}
 	}
 }
 
@@ -545,36 +590,35 @@ void main()
 {
 	CreateDirectoryW(L"files", NULL);
 	file.open("./files/Координаты.txt");
-	//flog.open("./files/log.txt");
+	flog.open("./files/log.txt");
 	fileP.open("./files/Вероятности.txt");
 
 	setlocale(LC_ALL, "rus");
-	//cout << "Размер квадрата: ";
-	//cin >> L;
+	cout << "Размер квадрата: ";
+	cin >> L;
 	//cout << "Средняя длина трубки: ";
 	//cin >> mean; 
 	//cout << "Количество испытаний: ";
 	//cin >> N;
-	//cout << "Начальная концентрация: ";
-	//double p;
-	//cin >> p;
-	//cout << "Проницаемый слой(нач): ";
-	//cin >> mF;
-	//cout << "Проницаемый слой(кон): ";
-	//cin >> mF2;
+	cout << "Начальная концентрация: ";
+	double p;
+	cin >> p;
+	double step;
+	cout << "Шаг: ";
+	cin >> step;
+	cout << "Проницаемый слой: ";
+	cin >> mF;
+	
 	/*cout << "Рисовать(+/-): ";
 	char strDraw;
 	cin >> strDraw;*/
 
-	L = 1000;
+	//L = 1000;
 	mean = 100;
 	N = 100;
 	//mF = 1;
 	/*if (strDraw == '+') draw = true;
 	else draw = false;*/
-	L *= radius;
-	mean *= radius;
-	//mF *= radius;
 
 	file << "Размер квадрата: " << L << endl;
 	file << "Средняя длина трубки: " << mean << endl;
@@ -582,16 +626,16 @@ void main()
 	file << "Количество испытаний: " << N << endl;
 	
 
-//	devi = mean * 0.1;
-	devi = 0;
+	devi = mean * 0.05;
+	//devi = 0;
 	file << setw(7) << "x" << "|" << setw(7) << "y" << "|" << setw(7) << "k" << "|" << endl;
 
 	transFlag = new bool[8];
 	bool*pr = new bool[3];
 	int pCl = 0;
-	//bool first = true;
+	bool first = true;
 	/*for (mF = 1; mF < 2; mF++)
-	{*/	
+	{*/
 		
 		//U_max = pow(aa, 2) / pow(r_max, 6);
 		//range_min = U_min / U_max;
@@ -603,9 +647,10 @@ void main()
 		for (int i = 0; i < 3; i++)
 			pr[i] = false;
 		bool stop = false;
-		double step = 0.00005;
+		
 		int diffP = 0;
-		double p = 0.000001, p2= 0.1;
+		//double p = 0.021, 
+		double p2= 0.1;
 		for (; p < p2; p += step)
 		{
 			//GraphInConsole();
@@ -684,22 +729,22 @@ void main()
 				pClusters.clear();
 				x0.clear();
 				y0.clear();
-				//if (!draw)
-				//{
-				//	HWND hwnd = GetConsoleWindow(); //Берём ориентир на консольное окно (В нём будем рисовать)
-				//	RECT WinCoord = {}; //Массив координат окна  
-				//	GetWindowRect(hwnd, &WinCoord); //Узнаём координаты
-				//	HDC dc = GetDC(hwnd);
+				if (draw)
+				{
+					HWND hwnd = GetConsoleWindow(); //Берём ориентир на консольное окно (В нём будем рисовать)
+					RECT WinCoord = {}; //Массив координат окна  
+					GetWindowRect(hwnd, &WinCoord); //Узнаём координаты
+					HDC dc = GetDC(hwnd);
 
-				//	HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0)); //Создаём кисть определённого стиля и цвета
-				//	SelectObject(dc, brush); //Выбираем кисть
-				//	Rectangle(dc, changeX - 100, changeY - 10, WinCoord.right, 2 * L); //Рисуем новый прямоугольник, который будет небом
-				//	DeleteObject(brush); //Очищаем память от созданной, но уже ненужной кисти
-				//	ReleaseDC(hwnd, dc);
-				//	GraphInConsole();
-				//}
+					HBRUSH brush = CreateSolidBrush(RGB(0, 0, 0)); //Создаём кисть определённого стиля и цвета
+					SelectObject(dc, brush); //Выбираем кисть
+					//Rectangle(dc, changeX - 100, changeY - 10, WinCoord.right, 2 * L); //Рисуем новый прямоугольник, который будет небом
+					DeleteObject(brush); //Очищаем память от созданной, но уже ненужной кисти
+					ReleaseDC(hwnd, dc);
+					GraphInConsole();
+				}
 
-				//if (diffP == 1) break;
+				if (diffP == 1) break;
 				
 			}
 
@@ -740,9 +785,9 @@ void main()
 	cntList.clear();
 	fileP.close();
 	file.close();
-	//flog.close();
+	flog.close();
 	cout << "Упаковка завершена" << endl;
-	system("pause");
+	//system("pause");
 }
 
 
